@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "from": "them",
+    "text": "Hello, there!  What can I help you with today?",
+    "ts": "10:14 AM"
+  },
+  {
+    "id": 2,
+    "from": "me",
+    "text": "Hello!  I've been coughing a lot since yesterday. What should I do?",
+    "ts": "10:16 AM"
+  },
+  {
+    "id": 3,
+    "from": "them",
+    "text": "I see. I'll need a little more information.  Do you have high fever?  Do you see blood in when you cough? Does it get worse when you are outside?",
+    "ts": "10:17 AM"
+  },
+  {
+    "id": 4,
+    "from": "me",
+    "text": "blood",
+    "ts": "5/18/2026, 05:24 PM"
+  },
+  {
+    "id": 5,
+    "from": "them",
+    "text": "Could you give me more info?",
+    "ts": "5/18/2026, 05:24 PM"
+  }
+]

@@ -1,0 +1,50 @@
+.main-panel {
+  background: none;
+  font-size: 16px;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 6px;
+}
+
+.thread-header {
+  border-bottom: 0.5px solid #999;
+  font-weight: 500;
+  padding: 16px 10px;
+}
+
+.converstaion-container {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.message {
+  align-items: flex-end;
+  background-color: lightblue;  
+  border-radius: 8px;
+  display: flex;
+  flex-direction: row;
+  padding: 12px;
+  margin: 5px;
+}
+
+.message.from-me {
+  align-self: flex-end;
+  background: pink;
+  margin-left: 40px;
+}
+
+.message.from-them {
+  align-self: flex-start;
+  flex-direction: row-reverse;
+  margin-right: 40px;
+}
+
+.input-bar {
+  display: flex;
+  align-items: stretch;
+}
+
+.input-message {
+  flex: 1 0 auto;
+  padding: 8px;
+}
