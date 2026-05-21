@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "from": "them",
+    "text": "Hello, there!  What can I help you with today?",
+    "ts": "10:14 AM"
+  },
+  {
+    "id": 2,
+    "from": "me",
+    "text": "i'm coughing.  help me figure out which doctor to see",
+    "ts": "5/19/2026, 02:01 PM"
+  },
+  {
+    "id": 3,
+    "from": "them",
+    "text": "I'd be happy to help you figure out which doctor to see for your cough!\n\nTo give you the best guidance, let me ask a few questions:\n\n1. **How long have you been coughing?** (A few days, weeks, or longer?)\n\n2. **Are you experiencing any other symptoms?**\n   - Fever or chills\n   - Shortness of breath or difficulty breathing\n   - Chest pain\n   - Wheezing\n   - Mucus/phlegm (and what color?)\n   - Sore throat, runny nose, or congestion\n\n3. **Do you have any existing health conditions?** (Asthma, COPD, heart disease, weakened immune system, etc.)\n\n4. **Is this cough getting worse, staying the same, or improving?**\n\n**In the meantime, here's general guidance:**\n\n- **Primary Care Doctor (Family Doctor/General Practitioner)**: Best starting point for most coughs, especially if symptoms are mild to moderate\n- **Urgent Care**: If you can't get a quick appointment with your primary doctor or have concerning symptoms\n- **Emergency Room**: Go immediately if you have:\n  - Severe difficulty breathing\n  - Chest pain\n  - Coughing up blood\n  - High fever with confusion\n  - Lips/face turning blue\n\nPlease share more details so I can give you more specific advice!",
+    "ts": "5/19/2026, 02:01 PM"
+  },
+  {
+    "id": 4,
+    "from": "me",
+    "text": "1. since yesterday\n2. no other symptoms\n3. I do have asthma\n4. coughing is about the same",
+    "ts": "5/19/2026, 02:02 PM"
+  },
+  {
+    "id": 5,
+    "from": "them",
+    "text": "Thank you for that information! Given that you have **asthma**, this is important context.\n\n**My recommendation:**\n\n**Contact your Primary Care Doctor or Asthma Specialist within the next 1-2 days.** Here's why:\n\n- A new cough in someone with asthma could be a sign of:\n  - An asthma flare-up or worsening control\n  - A respiratory infection that could trigger asthma symptoms\n  - Allergies or other asthma triggers\n\n**In the meantime:**\n\n1. **Use your rescue inhaler** (albuterol/salbutamol) as prescribed if you feel any breathing difficulty or tightness\n2. **Monitor for worsening symptoms** like:\n   - Increased shortness of breath\n   - Wheezing\n   - Chest tightness\n   - Needing your rescue inhaler more frequently than usual\n3. **Avoid known triggers** (cold air, smoke, allergens, etc.)\n\n**Seek immediate care (ER or call 911) if you develop:**\n- Severe difficulty breathing\n- Rescue inhaler isn't helping\n- Can't speak in full sentences\n- Lips or fingernails turning blue\n- Severe chest tightness\n\n**Since it's only been since yesterday and you have no other symptoms currently**, you don't need emergency care right now, but don't wait too long to check in with your doctor given your asthma history.\n\nDo you have your asthma medications available?",
+    "ts": "5/19/2026, 02:02 PM"
+  }
+]

@@ -8,25 +8,25 @@
   {
     "id": 2,
     "from": "me",
-    "text": "Hello!  I've been coughing a lot since yesterday. What should I do?",
-    "ts": "10:16 AM"
+    "text": "my stomach started to hurt in the morning. help me find why",
+    "ts": "5/20/2026, 05:12 PM"
   },
   {
     "id": 3,
-    "from": "them",
-    "text": "I see. I'll need a little more information.  Do you have high fever?  Do you see blood in when you cough? Does it get worse when you are outside?",
-    "ts": "10:17 AM"
+    "from": "me",
+    "text": "why does my stomach hurt",
+    "ts": "5/20/2026, 05:13 PM"
   },
   {
     "id": 4,
-    "from": "me",
-    "text": "blood",
-    "ts": "5/18/2026, 05:24 PM"
+    "from": "them",
+    "text": "Sorry to hear that your stomach is hurting! Don't worry, I'm here to help you explore possible reasons behind it.\n\nSince your stomach pain started in the morning, let's consider a few potential causes:\n\n1. **Hunger or Empty Stomach**: Sometimes, our bodies can get a bit mixed up, and we may feel hunger pangs or discomfort even when we've eaten a meal recently.\n2. **Digestive Issues**: Conditions like irritable bowel syndrome (IBS), inflammatory bowel disease (IBD), or acid reflux might cause morning stomach pain.\n3. **Eating Habits**: Consuming food that doesn't agree with you, eating too quickly, or drinking acidic beverages can irritate your stomach.\n4. **Food Intolerance or Sensitivity**: Lactose intolerance, gluten sensitivity, or an allergy to certain foods could be contributing factors.\n5. **Infections or Viral Gastroenteritis (Stomach Flu)**: Bacterial or viral infections like norovirus, rotavirus, or E. coli can cause stomach pain and discomfort.\n6. **Medications**: Certain medications, such as antibiotics, antacids, or pain relievers, can sometimes irritate the stomach.\n7. **Hormonal Changes**: Fluctuations in hormones during menstruation, pregnancy, or menopause might affect digestion and lead to stomach pain.\n\nTo better understand what's happening with your body:\n\n1. **When did you last eat?** Was it a light snack, a heavy meal, or something in between?\n2. **What have you eaten recently?** Are there any foods that commonly trigger stomach issues for you?\n3. **Have you noticed any other symptoms**, such as bloating, nausea, or changes in bowel movements?\n\nFeel free to share more about your situation, and I'll do my best to help you narrow down the possible causes.\n\nWould you like to:\n\nA) Explore potential triggers through a food diary\nB) Discuss common digestive issues and their symptoms\nC) Look into home remedies for soothing stomach pain\n\nChoose one of the options above or tell me something else that's on your mind!",
+    "ts": "5/20/2026, 05:14 PM"
   },
   {
     "id": 5,
     "from": "them",
     "text": "Could you give me more info?",
-    "ts": "5/18/2026, 05:24 PM"
+    "ts": "5/20/2026, 05:14 PM"
   }
 ]

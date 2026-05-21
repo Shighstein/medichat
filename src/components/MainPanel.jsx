@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 import './MainPanel.css';
 
 
@@ -14,14 +16,17 @@ export default function MainPanel() {
   // })
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetch('http://localhost:3001/api/messages')
-        .then(r => r.json())
-        .then(setMessages);
-    }, 2000);
+    fetch("http://localhost:3001/api/messages")
+      .then((r) => r.json())
+      .then(setMessages);
+    // const interval = setInterval(() => {
+    //   fetch('http://localhost:3001/api/messages')
+    //     .then(r => r.json())
+    //     .then(setMessages);
+    // }, 2000);
 
-    return () => clearInterval(interval);
-  }, [])
+    // return () => clearInterval(interval);
+  }, []);
   
   const send = () => {
     const text = draft.trim();
@@ -49,14 +54,18 @@ export default function MainPanel() {
         {messages.map((msg) => {
         const isMe = msg.from === 'me';
         return (
-          <div key={msg.id}
-            className={`message ${isMe ? 'from-me': 'from-them'}`}
+          <div
+            key={msg.id}
+            className={`message ${isMe ? "from-me" : "from-them"}`}
           >
-            <div>  
-              {msg.text}
-            </div>
+            <div
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(marked(msg.text)),
+              }}
+              style={{ lineHeight: 1.5, fontSize: 14 }}
+            />
           </div>
-        )
+        );
         })}
       </div>
       <div className='input-bar'>
