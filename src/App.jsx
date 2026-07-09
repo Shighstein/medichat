@@ -1,12 +1,11 @@
 import { createRoot } from "react-dom/client";
-import Mainpanel from "./components/MainPanel";
+import MainPanel from "./components/MainPanel";
 
 const App = () => {
   return (
     <div>
-      <Mainpanel />
+      <MainPanel />
     </div>
-    
   );
 }
 

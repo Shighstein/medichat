@@ -1,20 +1,59 @@
 .main-panel {
   background: none;
+  display: flex;
+  flex-direction: row;
   font-size: 16px;
   font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 40vh;
   padding: 6px;
 }
 
 .thread-header {
   border-bottom: 0.5px solid #999;
   font-weight: 500;
-  padding: 16px 10px;
 }
 
-.converstaion-container {
+.main-container {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding-left: 12px;
+}
+
+.chat-list {
+  border-right: 1px solid darkgray;
+  /* padding-right: 12px; */
+}
+
+.chat-list ul {
+  padding-left: 0;
+}
+
+.chat-list li {
+  cursor: pointer;
+  list-style-type: none;
+  margin-bottom: 4px;
+  padding: 8px 10px;
+}
+
+.chat-list li.selected {
+  background-color: rgb(200, 249, 198);
+}
+
+.current-chat {
+  display:flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 100px;
+  max-height: 90vh;
+}
+
+.chat-content {
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  flex: 1 1 auto;
+  overflow: scroll;
+  padding: 12px 0px 12px 0px;
 }
 
 .message {
@@ -24,7 +63,11 @@
   display: flex;
   flex-direction: row;
   padding: 12px;
-  margin: 5px;
+  /* margin: 5px; */
+}
+
+.message p {
+  margin: 0;
 }
 
 .message.from-me {
@@ -40,8 +83,10 @@
 }
 
 .input-bar {
-  display: flex;
   align-items: stretch;
+  align-self: stretch;
+  display: flex;
+  padding-left: 12px;
 }
 
 .input-message {
