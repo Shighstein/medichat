@@ -4,18 +4,11 @@ import DOMPurify from "dompurify";
 import './MainPanel.css';
 
 export default function MainPanel() {
-  const [contacts, setContacts] = useState([]);
   const [chats, setChats] = useState([]);
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
   const [chatId, setChatId] = useState(null);
   const [isThinking, setIsThinking] = useState(false);
-
-  // useEffect(() => {
-  //   fetch('http://localhost:3001/api/contacts')
-  //   .then(res => res.json())
-  //   .then(setContacts)
-  // })
 
   const fetchChats = () => {
     fetch("http://localhost:3001/api/chats")
@@ -26,10 +19,6 @@ export default function MainPanel() {
   useEffect(() => {
     fetchChats();
   }, []);
-
-  // useEffect(() => {
-  //   startNewChat();
-  // }, []);
 
   useEffect(() => {
     if (!chatId) return;

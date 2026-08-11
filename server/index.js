@@ -32,6 +32,9 @@ const getNewDate = () => {
   });
 };
 
+const getChatPath = (chatId) => path.join(__dirname, `messages_${chatId}.json`);
+
+
 app.post("/api/chats", async (req, res) => {
   const chatId = Date.now().toString();
   const initialMessage = [
@@ -42,15 +45,14 @@ app.post("/api/chats", async (req, res) => {
       ts: getNewDate(),
     },
   ];
-  const chatPath = path.join(__dirname, `messages_${chatId}.json`);
+  
+  const chatPath = getChatPath(chatId);
   await fs.promises.writeFile(
     chatPath,
     JSON.stringify(initialMessage, null, 2),
   );
   res.json({ chatId });
 });
-
-const getChatPath = (chatId) => path.join(__dirname, `messages_${chatId}.json`);
 
 app.get("/api/chats", (req, res) => {
   const files = fs
@@ -92,7 +94,6 @@ app.post("/api/messages/:chatId", async (req, res) => {
   };
   messages.push(message);
   writemessages(getChatPath(req.params.chatId), messages);
-  // res.json(message);
 
   // history
   const history = messages.map((m) => ({
@@ -100,7 +101,6 @@ app.post("/api/messages/:chatId", async (req, res) => {
     content: m.text,
   }));
 
-  // app.listen(3001, () => console.log("--- history", history));
 
   // using claude
   // const response = await anthropic.messages.create({
