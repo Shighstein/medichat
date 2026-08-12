@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
 import { fileURLToPath } from "url";
+import { constructMessage } from "../src/utils/messageUtils.js";
 // import { Message } from '../src/Message';
 
 // dotenv.config();
@@ -25,26 +26,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const getNewDate = () => {
-  return new Date().toLocaleDateString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
 const getChatPath = (chatId) => path.join(__dirname, `messages_${chatId}.json`);
 
-
 app.post("/api/chats", async (req, res) => {
-  const chatId = Date.now().toString();
-  const initialMessage = [
-    {
-      id: 1,
-      from: "them",
-      text: "How can I help you?",
-      ts: getNewDate(),
-    },
-  ];
+  const chatId = Date.now().toString(); // TODO: come up with better naming
+  const initialMessage = [constructMessage(1, "them", "how can i help")];
   
   const chatPath = getChatPath(chatId);
   await fs.promises.writeFile(

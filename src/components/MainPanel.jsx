@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { marked } from "marked";
 import DOMPurify from "dompurify";
+import ChatList from "./ChatList";
+import { constructMessage } from "../utils/messageUtils.js";
 import './MainPanel.css';
 
 export default function MainPanel() {
@@ -41,21 +43,17 @@ export default function MainPanel() {
       });
   };
 
+  function chatSelected(id) {
+    setChatId(id);
+  }
+
   const send = () => {
     const text = draft.trim();
     if (!text) return;
     setDraft("");
     setMessages((prev) => [
       ...prev,
-      {
-        id: messages.length + 1,
-        from: "me",
-        text,
-        ts: new Date().toLocaleDateString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      },
+      constructMessage(messages.length + 1, "me", text),
     ]);
 
     setIsThinking(true);
@@ -77,36 +75,16 @@ export default function MainPanel() {
 
   return (
     <div className="main-panel">
-      <div className="chat-list">
-        <button onClick={startNewChat}>new chat</button>
-        <ul>
-          {chats.length > 0 &&
-            chats.map((chat) => {
-              const chatLabel =
-                typeof chat === "string"
-                  ? chat
-                  : (chat.chatId ?? chat.id ?? "Chat");
-              const chatKey = chatLabel;
-              const targetChatId = chat.chatId ?? chat.id;
-
-              return (
-                <li
-                  key={chatKey}
-                  className={chatId === targetChatId ? "selected" : ""}
-                  onClick={() => {
-                    setChatId(targetChatId);
-                  }}
-                >
-                  {chatLabel}
-                </li>
-              );
-            })}
-        </ul>
+      <div className="main-panel-header">
+        <h2>Medi chat</h2>
+        <p>Ask questions and have better questions to ask doctors</p>
       </div>
       <div className="main-container">
-        <div className="thread-header">
-          <h2>Med chat</h2>
-        </div>
+        <ChatList
+          chats={chats}
+          onStartNewChat={startNewChat}
+          onChatSelected={chatSelected}
+        />
         <div className="current-chat">
           <div className="chat-content">
             {messages.length > 0 &&
