@@ -75,13 +75,14 @@ export default function MainPanel() {
 
   return (
     <div className="main-panel">
-      <div className="main-panel-header">
-        <h2>Medi chat</h2>
+      <div className="pb-6">
+        <h2 className="font-medium text-5xl">Medi chat</h2>
         <p>Ask questions and have better questions to ask doctors</p>
       </div>
       <div className="main-container">
         <ChatList
           chats={chats}
+          selectedChatId={chatId}
           onStartNewChat={startNewChat}
           onChatSelected={chatSelected}
         />

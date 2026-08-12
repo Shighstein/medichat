@@ -1,95 +1,58 @@
+@import 'tailwindcss';
+
 .main-panel {
-  background: none;
-  display: flex;
-  flex-direction: column;
-  font-size: 16px;
-  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  min-height: 40vh;
-  padding: 6px;
+  @apply flex flex-col text-base min-h-[40vh] p-1.5 border-2 border-gray-100 bg-gray-50;
 }
 
 .thread-header {
-  border-bottom: 0.5px solid #999;
-  font-weight: 500;
+  @apply font-medium border-b border-gray-400 items-stretch;
 }
 
 .main-container {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: row;
-  padding-left: 12px;
+  @apply flex flex-1 flex-row pl-0 items-stretch;
 }
 
 .chat-list {
-  border-right: 1px solid darkgray;
-  /* padding-right: 12px; */
+  @apply border-r border-gray-400;
 }
 
-.chat-list ul {
-  padding-left: 0;
+.chat-list-item {
+  @apply cursor-pointer list-none mb-1 px-2.5 py-1;
 }
 
-.chat-list li {
-  cursor: pointer;
-  list-style-type: none;
-  margin-bottom: 4px;
-  padding: 8px 10px;
-}
-
-.chat-list li.selected {
-  background-color: rgb(200, 249, 198);
+.chat-list-item.selected {
+  @apply bg-gray-200;
 }
 
 .current-chat {
-  display:flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 100px;
-  max-height: 90vh;
+  @apply flex flex-1 flex-col min-h-[100px] max-h-[90vh];
 }
 
 .chat-content {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  overflow: scroll;
-  padding: 12px 0px 12px 0px;
+  @apply flex flex-col flex-1 overflow-scroll px-1 bg-white;
 }
 
 .message {
-  align-items: flex-end;
-  background-color: lightblue;  
-  border-radius: 8px;
-  display: flex;
-  flex-direction: row;
-  padding: 12px;
-  /* margin: 5px; */
+  @apply flex flex-row items-end bg-blue-100 rounded-lg p-3 mb-2;
 }
 
 .message p {
-  margin: 0;
+  @apply m-0;
 }
 
 .message.from-me {
-  align-self: flex-end;
-  background: pink;
-  margin-left: 40px;
+  @apply self-end bg-pink-200 ml-10;
 }
 
 .message.from-them {
-  align-self: flex-start;
-  flex-direction: row-reverse;
-  margin-right: 40px;
+  @apply self-start flex-row-reverse mr-10;
 }
 
 .input-bar {
-  align-items: stretch;
-  align-self: stretch;
-  display: flex;
-  padding-left: 12px;
+  @apply flex items-stretch self-stretch pl-3 bg-white;
+
 }
 
 .input-message {
-  flex: 1 0 auto;
-  padding: 8px;
+  @apply flex-1 p-2;
 }

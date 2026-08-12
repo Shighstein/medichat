@@ -30,7 +30,9 @@ const getChatPath = (chatId) => path.join(__dirname, `messages_${chatId}.json`);
 
 app.post("/api/chats", async (req, res) => {
   const chatId = Date.now().toString(); // TODO: come up with better naming
-  const initialMessage = [constructMessage(1, "them", "how can i help")];
+  const initialMessage = [
+    constructMessage(1, "them", "Hi there! Ask me anything!"),
+  ];
   
   const chatPath = getChatPath(chatId);
   await fs.promises.writeFile(
@@ -64,7 +66,6 @@ app.get("/api/messages/:chatId", async (req, res) => {
 });
 
 app.post("/api/messages/:chatId", async (req, res) => {
-  // app.listen(3001, () => console.log("--- posting a message", req));
   const messages = JSON.parse(
     fs.readFileSync(getChatPath(req.params.chatId), "utf-8"),
   );
@@ -86,7 +87,6 @@ app.post("/api/messages/:chatId", async (req, res) => {
     role: m.from === "me" ? "user" : "assistant",
     content: m.text,
   }));
-
 
   // using claude
   // const response = await anthropic.messages.create({
