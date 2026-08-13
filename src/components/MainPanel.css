@@ -25,7 +25,7 @@
 }
 
 .current-chat {
-  @apply flex flex-1 flex-col min-h-[100px] max-h-[90vh];
+  @apply flex flex-1 flex-col min-h-[100px] max-h-[80vh];
 }
 
 .chat-content {

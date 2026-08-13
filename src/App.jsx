@@ -1,10 +1,13 @@
 import { createRoot } from "react-dom/client";
 import MainPanel from "./components/MainPanel";
+import { LLModelProvider } from "./LLModelContext";
 
 const App = () => {
   return (
     <div>
-      <MainPanel />
+      <LLModelProvider>
+        <MainPanel />
+      </LLModelProvider>
     </div>
   );
 }

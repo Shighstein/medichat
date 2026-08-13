@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext, useRef, useCallback } from "react";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
+import { LLModelContext } from "../LLModelContext.jsx";
 import ChatList from "./ChatList";
+import Header from "./Header.jsx";
 import { constructMessage } from "../utils/messageUtils.js";
-import './MainPanel.css';
+import "./MainPanel.css";
 
 export default function MainPanel() {
   const [chats, setChats] = useState([]);
@@ -11,12 +13,63 @@ export default function MainPanel() {
   const [draft, setDraft] = useState("");
   const [chatId, setChatId] = useState(null);
   const [isThinking, setIsThinking] = useState(false);
+  const { llm } = useContext(LLModelContext);
+  const bottomRef = useRef(null);
 
-  const fetchChats = () => {
+  const fetchChats = useCallback(() => {
     fetch("http://localhost:3001/api/chats")
       .then((r) => r.json())
       .then(setChats);
+  }, []);
+
+  const startNewChat = useCallback(() => {
+    fetch("http://localhost:3001/api/chats", {
+      method: "POST",
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        setChatId(data.chatId);
+        setMessages([]);
+        fetchChats();
+      });
+  }, []);
+
+  const chatSelected = useCallback((id) => {
+    setChatId(id);
+  }, []);
+
+  const send = () => {
+    const text = draft.trim();
+    if (!text) return;
+
+    addUserMessage(text);
+    addAssistanceMessage(text);
+    setDraft("");
   };
+
+  function addUserMessage(text) {
+    setMessages((prev) => [
+      ...prev,
+      constructMessage(prev.length + 1, "me", text),
+    ]);
+
+    setIsThinking(true);
+  }
+
+  function addAssistanceMessage(text) {
+    fetch(`http://localhost:3001/api/messages/${chatId}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text, llm }),
+    })
+      .then((r) => r.json())
+      .then((aiResponse) => {
+        setMessages((prev) => [...prev, aiResponse]);
+        setIsThinking(false);
+      });
+  }
 
   useEffect(() => {
     fetchChats();
@@ -31,54 +84,9 @@ export default function MainPanel() {
       .catch((reason) => console.error(`failed ${reason}`));
   }, [chatId]);
 
-  const startNewChat = () => {
-    fetch("http://localhost:3001/api/chats", {
-      method: "POST",
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        setChatId(data.chatId);
-        setMessages([]);
-        fetchChats();
-      });
-  };
-
-  function chatSelected(id) {
-    setChatId(id);
-  }
-
-  const send = () => {
-    const text = draft.trim();
-    if (!text) return;
-    setDraft("");
-    setMessages((prev) => [
-      ...prev,
-      constructMessage(messages.length + 1, "me", text),
-    ]);
-
-    setIsThinking(true);
-
-    fetch(`http://localhost:3001/api/messages/${chatId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ text }),
-    })
-      .then((r) => r.json())
-      .then((aiResponse) => {
-        console.log("newMessage:", aiResponse);
-        setMessages((prev) => [...prev, aiResponse]);
-        setIsThinking(false);
-      });
-  };
-
   return (
     <div className="main-panel">
-      <div className="pb-6">
-        <h2 className="font-medium text-5xl">Medi chat</h2>
-        <p>Ask questions and have better questions to ask doctors</p>
-      </div>
+      <Header />
       <div className="main-container">
         <ChatList
           chats={chats}
@@ -111,7 +119,7 @@ export default function MainPanel() {
               </div>
             )}
           </div>
-          <div>
+          <div ref={bottomRef}>
             <form
               className="input-bar"
               onSubmit={(e) => {
@@ -129,6 +137,7 @@ export default function MainPanel() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && e.metaKey) {
                     e.preventDefault();
+                    e.stopPropagation();
                     send();
                   }
                 }}

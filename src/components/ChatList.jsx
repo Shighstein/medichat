@@ -1,4 +1,6 @@
-export default function ChatList({
+import { memo } from "react";
+
+const ChatList = memo(function ChatList({
   chats,
   onStartNewChat,
   onChatSelected,
@@ -39,4 +41,6 @@ export default function ChatList({
       </ul>
     </div>
   );
-}
+});
+
+export default ChatList;

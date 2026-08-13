@@ -1,5 +1,4 @@
 export function constructMessage(id, from, text) {
-  console.log('construct message', id, from, text)
   return {
     id,
     from,
