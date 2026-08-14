@@ -1,8 +1,12 @@
-import { memo, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import MessagePost from "./MessagePost";
 
-  function ChatContainer({messages, isThinking}) {
-    const bottomRef = useRef(null);
+function ChatContainer({ messages, isThinking }) {
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isThinking]);
 
   return (
     <div className="chat-content">
@@ -14,8 +18,8 @@ import MessagePost from "./MessagePost";
         </div>
       )}
       <div ref={bottomRef} />
-    </div> 
-  )
+    </div>
+  );
 }
 
 export default ChatContainer;

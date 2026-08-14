@@ -1,6 +1,7 @@
-function MessageInputBar({draft, onChange, onKeyDown, onSend}) {
-  return (
+import { memo } from "react";
 
+function MessageInputBar({ draft, onChange, onKeyDown, onSend }) {
+  return (
     <div className="input-bar">
       <textarea
         id="message-input"
@@ -10,7 +11,7 @@ function MessageInputBar({draft, onChange, onKeyDown, onSend}) {
         value={draft}
         onChange={onChange}
         onKeyDown={onKeyDown}
-        />
+      />
       <button type="button" onClick={onSend}>
         Send
       </button>
@@ -18,4 +19,4 @@ function MessageInputBar({draft, onChange, onKeyDown, onSend}) {
   );
 }
 
-export default MessageInputBar;
+export default memo(MessageInputBar);

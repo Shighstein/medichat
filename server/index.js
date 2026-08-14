@@ -1,23 +1,21 @@
-// import Anthropic from "@anthropic-ai/sdk";
-// import dotenv from "dotenv";
+import Anthropic from "@anthropic-ai/sdk";
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import fs, { write } from "fs";
+import fs from "fs";
 import path from "path";
-import { randomUUID } from "crypto";
 import { fileURLToPath } from "url";
 import { constructMessage } from "../src/utils/messageUtils.js";
-// import { Message } from '../src/Message';
 
-// dotenv.config();
-// const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+dotenv.config();
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const MESSAGES_DIR = path.join(__dirname, './messages');
+const MESSAGES_DIR = path.join(__dirname, "./messages");
 // const DB_PATH = path.join(__dirname, "message.json");
 
 const readMessages = async (chatPath) =>
@@ -102,15 +100,18 @@ app.listen(3001, () => console.log("API running on http://localhost:3001"));
 
 // helpers
 async function getResponseFromClaude(history) {
-  const response = await anthropic.messages.create({
-    model: "claude-sonnet-4-5",
-    max_tokens: 500,
-    system:
-      "You are a knowledgeable medical assistant. Answer clearly and concisely. Always recommend consulting a doctor for serious concerns.",
-    messages: history,
-  });
+  throw new Error(
+    "Claude integration is not enabled for the time being. Please use Ollama instead",
+  );
+  // const response = await anthropic.messages.create({
+  //   model: "claude-sonnet-4-5",
+  //   max_tokens: 500,
+  //   system:
+  //     "You are a knowledgeable medical assistant. Answer clearly and concisely. Always recommend consulting a doctor for serious concerns.",
+  //   messages: history,
+  // });
 
-  return response;
+  // return response;
 }
 
 async function getResponseFromOllama(history) {

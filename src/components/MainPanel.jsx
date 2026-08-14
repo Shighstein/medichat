@@ -2,7 +2,6 @@ import { useState, useEffect, useContext, useRef, useCallback } from "react";
 import { LLModelContext } from "../LLModelContext.jsx";
 import ChatList from "./ChatList";
 import Header from "./Header.jsx";
-import MessagePost from "./MessagePost.jsx";
 import { constructMessage } from "../utils/messageUtils.js";
 import "./MainPanel.css";
 import ChatContainer from "./ChatContainer.jsx";
@@ -55,7 +54,7 @@ export default function MainPanel() {
     ]);
 
     setIsThinking(true);
-  });
+  }, []);
 
   const addAssistanceMessage = useCallback(
     (text) => {

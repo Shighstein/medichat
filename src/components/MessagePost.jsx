@@ -1,12 +1,19 @@
+import { memo } from "react";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 
-function MessagePost({msg}) {
+marked.use({
+  renderer: {
+    link(href, title, text) {
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    },
+  },
+});
+
+function MessagePost({ msg }) {
   const isMe = msg.from === "me";
   return (
-    <div
-      className={`message ${isMe ? "from-me" : "from-them"}`}
-    >
+    <div className={`message ${isMe ? "from-me" : "from-them"}`}>
       <div
         dangerouslySetInnerHTML={{
           __html: DOMPurify.sanitize(marked(msg.text)),
@@ -17,4 +24,4 @@ function MessagePost({msg}) {
   );
 }
 
-export default MessagePost;
+export default memo(MessagePost);
