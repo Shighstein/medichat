@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 .main-panel {
-  @apply flex flex-col text-base min-h-[40vh] p-1.5 border-2 border-gray-100 bg-gray-50;
+  @apply flex flex-col text-base h-dvh p-1.5 border-2 border-gray-100 bg-gray-50;
 }
 
 .thread-header {
@@ -25,11 +25,12 @@
 }
 
 .current-chat {
-  @apply flex flex-1 flex-col min-h-[100px] max-h-[80vh];
+  @apply flex flex-1 flex-col;
 }
 
 .chat-content {
   @apply flex flex-col flex-1 overflow-scroll px-1 bg-white;
+  max-height: 70vh;
 }
 
 .message {

@@ -1,11 +1,12 @@
 import { useState, useEffect, useContext, useRef, useCallback } from "react";
-import { marked } from "marked";
-import DOMPurify from "dompurify";
 import { LLModelContext } from "../LLModelContext.jsx";
 import ChatList from "./ChatList";
 import Header from "./Header.jsx";
+import MessagePost from "./MessagePost.jsx";
 import { constructMessage } from "../utils/messageUtils.js";
 import "./MainPanel.css";
+import ChatContainer from "./ChatContainer.jsx";
+import MessageInputBar from "./MessageInputBar.jsx";
 
 export default function MainPanel() {
   const [chats, setChats] = useState([]);
@@ -14,7 +15,6 @@ export default function MainPanel() {
   const [chatId, setChatId] = useState(null);
   const [isThinking, setIsThinking] = useState(false);
   const { llm } = useContext(LLModelContext);
-  const bottomRef = useRef(null);
 
   const fetchChats = useCallback(() => {
     fetch("http://localhost:3001/api/chats")
@@ -32,44 +32,48 @@ export default function MainPanel() {
         setMessages([]);
         fetchChats();
       });
-  }, []);
+  }, [fetchChats]);
 
   const chatSelected = useCallback((id) => {
     setChatId(id);
   }, []);
 
-  const send = () => {
+  const send = useCallback(() => {
+    console.log("send()");
     const text = draft.trim();
     if (!text) return;
 
     addUserMessage(text);
     addAssistanceMessage(text);
     setDraft("");
-  };
+  });
 
-  function addUserMessage(text) {
+  const addUserMessage = useCallback((text) => {
     setMessages((prev) => [
       ...prev,
       constructMessage(prev.length + 1, "me", text),
     ]);
 
     setIsThinking(true);
-  }
+  });
 
-  function addAssistanceMessage(text) {
-    fetch(`http://localhost:3001/api/messages/${chatId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ text, llm }),
-    })
-      .then((r) => r.json())
-      .then((aiResponse) => {
-        setMessages((prev) => [...prev, aiResponse]);
-        setIsThinking(false);
-      });
-  }
+  const addAssistanceMessage = useCallback(
+    (text) => {
+      fetch(`http://localhost:3001/api/messages/${chatId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text, llm }),
+      })
+        .then((r) => r.json())
+        .then((aiResponse) => {
+          setMessages((prev) => [...prev, aiResponse]);
+          setIsThinking(false);
+        });
+    },
+    [chatId, llm],
+  );
 
   useEffect(() => {
     fetchChats();
@@ -84,6 +88,11 @@ export default function MainPanel() {
       .catch((reason) => console.error(`failed ${reason}`));
   }, [chatId]);
 
+  // TODO: remove after re-rendering bug is resolved
+  // useEffect(() => {
+  //   console.log("--------------- chatId changed:", chatId);
+  // }, [chatId]);
+
   return (
     <div className="main-panel">
       <Header />
@@ -95,56 +104,19 @@ export default function MainPanel() {
           onChatSelected={chatSelected}
         />
         <div className="current-chat">
-          <div className="chat-content">
-            {messages.length > 0 &&
-              messages.map((msg) => {
-                const isMe = msg.from === "me";
-                return (
-                  <div
-                    key={msg.id}
-                    className={`message ${isMe ? "from-me" : "from-them"}`}
-                  >
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(marked(msg.text)),
-                      }}
-                      style={{ lineHeight: 1.5, fontSize: 14 }}
-                    />
-                  </div>
-                );
-              })}
-            {isThinking && (
-              <div key="thinking" className="thinking">
-                Thinking...
-              </div>
-            )}
-          </div>
-          <div ref={bottomRef}>
-            <form
-              className="input-bar"
-              onSubmit={(e) => {
+          <ChatContainer messages={messages} isThinking={isThinking} />
+          <MessageInputBar
+            draft={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && e.metaKey) {
                 e.preventDefault();
+                e.stopPropagation();
                 send();
-              }}
-            >
-              <textarea
-                id="message-input"
-                className="input-message"
-                type="text"
-                placeholder={`Ask anything`}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && e.metaKey) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    send();
-                  }
-                }}
-              />
-              <button type="submit">Send</button>
-            </form>
-          </div>
+              }
+            }}
+            onSend={send}
+          />
         </div>
       </div>
     </div>

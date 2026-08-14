@@ -1,14 +1,13 @@
-import { createContext, useState } from 'react';
+import { createContext, useMemo, useState } from "react";
 
 export const LLModelContext = createContext({
-  llm: 'ollama'}
-)
+  llm: "ollama",
+});
 
-export function LLModelProvider({children}) {
-  const [llm, setLlm] = useState('ollama')
+export function LLModelProvider({ children }) {
+  const [llm, setLlm] = useState("ollama");
+  const value = useMemo(() => ({ llm, setLlm }), [llm]);
   return (
-    <LLModelContext.Provider value={{llm, setLlm}}>
-      {children}
-    </LLModelContext.Provider>
-  )
+    <LLModelContext.Provider value={value}>{children}</LLModelContext.Provider>
+  );
 }

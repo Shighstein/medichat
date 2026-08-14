@@ -4,11 +4,11 @@ import { LLModelProvider } from "./LLModelContext";
 
 const App = () => {
   return (
-    <div>
+    <>
       <LLModelProvider>
         <MainPanel />
       </LLModelProvider>
-    </div>
+    </>
   );
 }
 

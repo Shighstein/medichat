@@ -5,5 +5,5 @@
 }
 
 :root {
-  @apply font-sans;
+  @apply font-sans h-dvh;
 }
