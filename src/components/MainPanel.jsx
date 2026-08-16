@@ -102,7 +102,7 @@ export default function MainPanel() {
           onStartNewChat={startNewChat}
           onChatSelected={chatSelected}
         />
-        <div className="current-chat">
+        <div className="flex flex-1 flex-col grow basis-auto self-stretch">
           <ChatContainer messages={messages} isThinking={isThinking} />
           <MessageInputBar
             draft={draft}

@@ -9,6 +9,7 @@ function ChatContainer({ messages, isThinking }) {
   }, [messages, isThinking]);
 
   return (
+    // <div className="chat-content-wrapper flex grow">
     <div className="chat-content">
       {messages.length > 0 &&
         messages.map((msg) => <MessagePost key={msg.id} msg={msg} />)}
@@ -19,6 +20,7 @@ function ChatContainer({ messages, isThinking }) {
       )}
       <div ref={bottomRef} />
     </div>
+    // </div>
   );
 }
 
