@@ -38,7 +38,6 @@ export default function MainPanel() {
   }, []);
 
   const send = useCallback(() => {
-    console.log("send()");
     const text = draft.trim();
     if (!text) return;
 
@@ -86,11 +85,6 @@ export default function MainPanel() {
       .then(setMessages)
       .catch((reason) => console.error(`failed ${reason}`));
   }, [chatId]);
-
-  // TODO: remove after re-rendering bug is resolved
-  // useEffect(() => {
-  //   console.log("--------------- chatId changed:", chatId);
-  // }, [chatId]);
 
   return (
     <div className="main-panel">
