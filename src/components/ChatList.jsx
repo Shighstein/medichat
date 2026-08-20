@@ -1,9 +1,11 @@
 import { memo } from "react";
+import ChatListItem from "./ChatListItem";
 
 const ChatList = memo(function ChatList({
   chats,
   onStartNewChat,
   onChatSelected,
+  onArchiveChat,
   selectedChatId,
 }) {
   function getChatListClassName(isSelected) {
@@ -15,14 +17,15 @@ const ChatList = memo(function ChatList({
   }
 
   return (
-    <div className="border-r border-gray-200 flex flex-col">
+    <div className="chat-list h-full flex flex-col min-w-10 bg-white">
       <button
-        className="cursor-pointer border-2 border-gray-200 p-4"
+        className="new-button button cursor-pointer p-4 flex flex-row "
         onClick={onStartNewChat}
       >
-        new chat
+        <span className="flex grow-1">New chat</span>
+        <img src="src/images/plus-fill-purple.svg" height="20" width="20" />
       </button>
-      <ul className="p-1">
+      <ul className="">
         {chats.length > 0 &&
           chats.map((chat) => {
             const chatLabel = chat.chatId ?? "Chat";
@@ -30,11 +33,14 @@ const ChatList = memo(function ChatList({
 
             return (
               <li
-                className={getChatListClassName(chat.chatId === selectedChatId)}
                 key={chatLabel}
                 onClick={() => onChatSelected(chat.chatId)}
+                className={getChatListClassName(selectedChatId === chat.chatId)}
               >
-                {getChatName(chat.chatId)}
+                <ChatListItem
+                  chatName={getChatName(chat.chatId)}
+                  onArchive={() => onArchiveChat(chat.chatId)}
+                />
               </li>
             );
           })}

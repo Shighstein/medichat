@@ -2,18 +2,27 @@ import { memo } from "react";
 
 function MessageInputBar({ draft, onChange, onKeyDown, onSend }) {
   return (
-    <div className="input-bar">
+    <div className="input-bar border-t-2 border-gray-200 flex items-stretch self-stretch pl-3 bg-white">
       <textarea
         id="message-input"
-        className="input-message"
+        className="input-message flex-1 p-2"
         type="text"
         placeholder={`Ask anything`}
         value={draft}
         onChange={onChange}
         onKeyDown={onKeyDown}
       />
-      <button type="button" onClick={onSend}>
-        Send
+      <button
+        className="send-button button px-4 cursor-pointe"
+        type="button"
+        onClick={onSend}
+      >
+        <img
+          src="src/images/send-outline-nofill-purple.svg"
+          atl="send"
+          width="20"
+          height="20"
+        />
       </button>
     </div>
   );

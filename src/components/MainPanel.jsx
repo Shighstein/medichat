@@ -1,19 +1,50 @@
 import { useState, useEffect, useContext, useRef, useCallback } from "react";
 import { LLModelContext } from "../LLModelContext.jsx";
+import { ChatIdContext } from "../ChatIdContext.jsx";
 import ChatList from "./ChatList";
 import Header from "./Header.jsx";
 import { constructMessage } from "../utils/messageUtils.js";
 import "./MainPanel.css";
-import ChatContainer from "./ChatContainer.jsx";
+import ChatContent from "./ChatContent.jsx";
 import MessageInputBar from "./MessageInputBar.jsx";
 
+const CHAT_LIST_MIN_WIDTH = 150;
+const CHAT_LIST_MAX_WIDTH = 600;
+
 export default function MainPanel() {
-  const [chats, setChats] = useState([]);
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
-  const [chatId, setChatId] = useState(null);
   const [isThinking, setIsThinking] = useState(false);
+  const [chats, setChats] = useState([]);
+  const [chatListWidth, setChatListWidth] = useState(200);
+  const { chatId, setChatId } = useContext(ChatIdContext);
   const { llm } = useContext(LLModelContext);
+
+  const resizeStartRef = useRef(null);
+
+  const handleResizeMouseMove = useCallback((e) => {
+    if (!resizeStartRef.current) return;
+    const { startX, startWidth } = resizeStartRef.current;
+    const nextWidth = startWidth + (e.clientX - startX);
+    setChatListWidth(
+      Math.min(CHAT_LIST_MAX_WIDTH, Math.max(CHAT_LIST_MIN_WIDTH, nextWidth)),
+    );
+  }, []);
+
+  const handleResizeMouseUp = useCallback(() => {
+    resizeStartRef.current = null;
+    document.removeEventListener("mousemove", handleResizeMouseMove);
+    document.removeEventListener("mouseup", handleResizeMouseUp);
+  }, [handleResizeMouseMove]);
+
+  const handleResizeMouseDown = useCallback(
+    (e) => {
+      resizeStartRef.current = { startX: e.clientX, startWidth: chatListWidth };
+      document.addEventListener("mousemove", handleResizeMouseMove);
+      document.addEventListener("mouseup", handleResizeMouseUp);
+    },
+    [chatListWidth, handleResizeMouseMove, handleResizeMouseUp],
+  );
 
   const fetchChats = useCallback(() => {
     fetch("http://localhost:3001/api/chats")
@@ -36,6 +67,22 @@ export default function MainPanel() {
   const chatSelected = useCallback((id) => {
     setChatId(id);
   }, []);
+
+  const archiveChat = useCallback(
+    (id) => {
+      console.log("archiving chat", id);
+      fetch(`http://localhost:3001/api/chats/${id}`, {
+        method: "DELETE",
+      }).then(() => {
+        if (chatId === id) {
+          setChatId(null);
+          setMessages([]);
+        }
+        fetchChats();
+      });
+    },
+    [chatId, fetchChats],
+  );
 
   const send = useCallback(() => {
     const text = draft.trim();
@@ -90,14 +137,21 @@ export default function MainPanel() {
     <div className="main-panel">
       <Header />
       <div className="main-container">
-        <ChatList
-          chats={chats}
-          selectedChatId={chatId}
-          onStartNewChat={startNewChat}
-          onChatSelected={chatSelected}
+        <div style={{ width: chatListWidth, flexShrink: 0 }}>
+          <ChatList
+            chats={chats}
+            selectedChatId={chatId}
+            onStartNewChat={startNewChat}
+            onChatSelected={chatSelected}
+            onArchiveChat={archiveChat}
+          />
+        </div>
+        <div
+          onMouseDown={handleResizeMouseDown}
+          className="resize-bar w-1 cursor-col-resize bg-indigo-100 hover:bg-purple-200 transition-colors"
         />
-        <div className="flex flex-1 flex-col grow basis-auto self-stretch">
-          <ChatContainer messages={messages} isThinking={isThinking} />
+        <div className="chat-container flex flex-1 flex-col min-h-0 self-stretch">
+          <ChatContent messages={messages} isThinking={isThinking} />
           <MessageInputBar
             draft={draft}
             onChange={(e) => setDraft(e.target.value)}

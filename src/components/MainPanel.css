@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 .main-panel {
-  @apply flex flex-col text-base h-dvh p-1.5 border-2 border-gray-100 bg-gray-50;
+  @apply flex flex-col text-base h-dvh p-1.5 bg-linear-to-b from-indigo-100 via-purple-50 to-pink-100;
 }
 
 .thread-header {
@@ -9,19 +9,27 @@
 }
 
 .main-container {
-  @apply flex flex-1 flex-row pl-0 items-stretch;
+  @apply flex flex-1 flex-row pl-0 items-stretch min-h-0;
+}
+
+.button {
+  @apply text-purple-950;
+}
+
+.button:hover {
+  @apply bg-purple-200;
 }
 
 .chat-list {
-  @apply border-r border-gray-400;
+  @apply h-full;
 }
 
 .chat-list-item {
-  @apply cursor-pointer list-none mb-1 px-2.5 py-1;
+  @apply cursor-pointer list-none mb-1;
 }
 
 .chat-list-item.selected {
-  @apply bg-gray-200;
+  @apply bg-indigo-200;
 }
 
 .current-chat {
@@ -29,12 +37,11 @@
 }
 
 .chat-content {
-  @apply flex flex-col flex-1 overflow-scroll px-1 bg-white;
-  /* max-height: 70vh; */
+  @apply flex flex-col flex-1 min-h-0 overflow-y-auto px-4 bg-white;
 }
 
 .message {
-  @apply flex flex-row items-end bg-blue-100 rounded-lg p-3 mb-2;
+  @apply flex flex-row items-end rounded-lg p-3 mb-2;
 }
 
 .message p {
@@ -42,17 +49,9 @@
 }
 
 .message.from-me {
-  @apply self-end bg-pink-200 ml-10;
+  @apply self-end  bg-linear-to-br from-pink-200 to-purple-50 ml-10;
 }
 
 .message.from-them {
-  @apply self-start flex-row-reverse mr-10;
-}
-
-.input-bar {
-  @apply flex items-stretch self-stretch pl-3 bg-white;
-}
-
-.input-message {
-  @apply flex-1 p-2;
+  @apply self-start flex-row-reverse mr-10 bg-linear-to-br from-indigo-200 to-purple-50;
 }

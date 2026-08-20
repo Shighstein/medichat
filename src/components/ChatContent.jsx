@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef } from "react";
 import MessagePost from "./MessagePost";
 
-function ChatContainer({ messages, isThinking }) {
+function ChatContent({ messages, isThinking }) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -10,7 +10,7 @@ function ChatContainer({ messages, isThinking }) {
 
   return (
     // <div className="chat-content-wrapper flex grow">
-    <div className="chat-content">
+    <div className="chat-content p-2">
       {messages.length > 0 &&
         messages.map((msg) => <MessagePost key={msg.id} msg={msg} />)}
       {isThinking && (
@@ -24,4 +24,4 @@ function ChatContainer({ messages, isThinking }) {
   );
 }
 
-export default ChatContainer;
+export default ChatContent;
