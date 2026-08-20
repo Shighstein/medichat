@@ -33,7 +33,7 @@ const ChatList = memo(function ChatList({
 
             return (
               <li
-                key={chatLabel}
+                key={chat.chatId}
                 onClick={() => onChatSelected(chat.chatId)}
                 className={getChatListClassName(selectedChatId === chat.chatId)}
               >
