@@ -2,6 +2,7 @@
 ### stack
 * React
 * Node, npm
+* express
 * prettier
 * vite
 * eslint

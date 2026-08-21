@@ -14,13 +14,13 @@ const ChatListItem = memo(function ChatListItem({chatName, onArchive}) {
     <div className="flex items-center px-2.5 py-2">
       <span className="truncate flex-1">{chatName}</span>
       <button
-        className="ml-3 px-2 shrink-0 cursor-pointer hover:bg-gray-400 rounded-2xl transition-colors"
+        className="ml-3 shrink-0 cursor-pointer hover:bg-indigo-300 rounded-xl transition-colors"
         onClick={(e) => {
           e.stopPropagation();
           deleteClicked();
         }}
       >
-        x
+        <img src="src/images/cross-purple.svg" height="30" width="30" />
       </button>
     </div>
   );
