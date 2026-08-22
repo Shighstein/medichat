@@ -19,7 +19,7 @@ const ChatList = memo(function ChatList({
   return (
     <div className="chat-list h-full flex flex-col min-w-10 bg-white">
       <button
-        className="new-button button cursor-pointer p-4 flex flex-row "
+        className="new-button button cursor-pointer p-4 flex flex-row bg-linear-to-b from-indigo-100 to-indigo-50"
         onClick={onStartNewChat}
       >
         <span className="flex grow-1">New chat</span>
@@ -38,7 +38,7 @@ const ChatList = memo(function ChatList({
                 className={getChatListClassName(selectedChatId === chat.chatId)}
               >
                 <ChatListItem
-                  chatName={getChatName(chat.chatId)}
+                  chatName={chat.name}
                   onArchive={() => onArchiveChat(chat.chatId)}
                 />
               </li>

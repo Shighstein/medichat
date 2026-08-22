@@ -17,6 +17,7 @@ app.use(express.json());
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MESSAGES_DIR = path.join(__dirname, "./messages");
 const ARCHIVE_DIR = path.join(__dirname, "./archive");
+
 // const DB_PATH = path.join(__dirname, "message.json");
 
 const readMessages = async (chatPath) =>
@@ -27,6 +28,16 @@ const writeMessages = async (chatPath, mesgs) =>
 
 const getChatPath = (chatId) =>
   path.join(MESSAGES_DIR, `messages_${chatId}.json`);
+
+const chatIndex = async () => {
+  const file = path.join(__dirname, `chat-index.json`);
+  return JSON.parse(await fs.promises.readFile(file, "utf-8"));
+};
+
+const writeChatIndex = async (index) => {
+  const file = path.join(__dirname, `chat-index.json`);
+  await fs.promises.writeFile(file, JSON.stringify(index, null, 2));
+};
 
 if (!fs.existsSync(MESSAGES_DIR)) {
   fs.mkdirSync(MESSAGES_DIR, { recursive: true });
@@ -42,17 +53,15 @@ app.post("/api/chats", async (req, res) => {
     constructMessage(1, "them", "Hi there! Ask me anything!"),
   ];
 
-  // await writeMessages(getChatPath(chatId), initialMessage);
-  await writeMessages(getChatPath(chatId), {
-    name: chatId,
-    messages: initialMessage,
-  });
+  await writeMessages(getChatPath(chatId), initialMessage);
 
   res.json({ chatId });
 });
 
-// gets all the message files to build the chat list
-app.get("/api/chats", (req, res) => {
+
+async function parseChatNames() {
+  const chatNameIndex = await chatIndex();
+
   const files = fs
     .readdirSync(MESSAGES_DIR)
     .filter((f) => f.startsWith("messages_") && f.endsWith(".json"))
@@ -61,6 +70,17 @@ app.get("/api/chats", (req, res) => {
       createdAt: fs.statSync(path.join(MESSAGES_DIR, f)).birthtime,
     }))
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  return files.map((f) => ({
+    chatId: f.chatId,
+    createdAt: f.createdAt,
+    name: chatNameIndex[f.chatId],
+  }));
+}
+
+// gets all the message files to build the chat list
+app.get("/api/chats", async (req, res) => {
+  const files = await parseChatNames();
   res.json(files);
 });
 
@@ -80,8 +100,8 @@ app.delete("/api/chats/:chatId", async (req, res) => {
 // read the individual message file (chat content)
 app.get("/api/messages/:chatId", async (req, res) => {
   try {
-    const chat = await readMessages(getChatPath(req.params.chatId));
-    res.json(chat.messages);
+    const messages = await readMessages(getChatPath(req.params.chatId));
+    res.json(messages);
   } catch (err) {
     res.status(404).json({ error: "Chat not found" });
   }
@@ -90,37 +110,80 @@ app.get("/api/messages/:chatId", async (req, res) => {
 // either 'me' or 'them' said something
 app.post("/api/messages/:chatId", async (req, res) => {
   const chatPath = getChatPath(req.params.chatId);
-  const chat = await readMessages(chatPath);
-  const message = constructMessage(chat.messages.length + 1, "me", req.body.text);
-  chat.messages.push(message);
-  await writeMessages(chatPath, chat);
+  const messages = await readMessages(chatPath);
+  const message = constructMessage(messages.length + 1, "me", req.body.text);
+  messages.push(message);
+  await writeMessages(chatPath, messages);
 
   // history
-  const history = chat.messages.map((m) => ({
+  const history = messages.map((m) => ({
     role: m.from === "me" ? "user" : "assistant",
     content: m.text,
   }));
 
   let response;
+  let chatName;
   if (req.body.llm === "claude") {
     response = await getResponseFromClaude(history);
   } else {
-    response = await getResponseFromOllama(history);
+    // response = await getResponseFromOllama(history);
+
+    [response, chatName] = await Promise.all([
+      getResponseFromOllama(history),
+      (await shouldRenameChat(req.params.chatId, history))
+        ? updateChatName(history)
+        : Promise.resolve(null),
+    ]);
   }
 
   const data = await response.json();
   const replyText = data.message.content;
   const updated = await readMessages(chatPath);
-  const reply = constructMessage(updated.messages.length + 1, "them", replyText);
+  const reply = constructMessage(updated.length + 1, "them", replyText);
 
-  updated.messages.push(reply);
+  updated.push(reply);
   await writeMessages(chatPath, updated);
-  res.json(reply);
+
+  if (chatName) {
+    const index = await chatIndex();
+    index[req.params.chatId] = chatName;
+    await writeChatIndex(index);
+  }
+  res.json({ reply, chatName });
 });
 
 app.listen(3001, () => console.log("API running on http://localhost:3001"));
 
 // helpers
+
+async function shouldRenameChat(chatId, history) {
+  const chatNameIndex = await chatIndex();
+  return history.length > 3 && !chatNameIndex[chatId];
+}
+
+async function updateChatName(history) {
+  const response = await fetch("http://localhost:11434/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "llama3.1",
+      stream: false,
+      messages: [
+        ...history,
+        {
+          role: "user",
+          content:
+            "Summarize the topic of this conversation in 3 to 5 words. Reply with only the summary - no punctuation. no quotes, no preamble.",
+        },
+      ],
+    }),
+  });
+
+  const data = await response.json();
+  return data.message.content.trim();
+}
+
+
 async function getResponseFromClaude(history) {
   throw new Error(
     "Claude integration is not enabled for the time being. Please use Ollama instead",

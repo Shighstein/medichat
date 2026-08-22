@@ -13,7 +13,7 @@ function MessageInputBar({ draft, onChange, onKeyDown, onSend }) {
         onKeyDown={onKeyDown}
       />
       <button
-        className="send-button button px-4 cursor-pointe"
+        className="send-button button px-4 cursor-pointe bg-linear-to-b from-pink-100 to-pink-0 border-b-2 border-indigo-50"
         type="button"
         onClick={onSend}
       >

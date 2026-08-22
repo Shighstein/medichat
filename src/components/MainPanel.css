@@ -17,7 +17,7 @@
 }
 
 .button:hover {
-  @apply bg-purple-200;
+  @apply bg-purple-100;
 }
 
 .chat-list {

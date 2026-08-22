@@ -112,9 +112,18 @@ export default function MainPanel() {
         body: JSON.stringify({ text, llm }),
       })
         .then((r) => r.json())
-        .then((aiResponse) => {
-          setMessages((prev) => [...prev, aiResponse]);
+        .then(({ reply, chatName }) => {
+          setMessages((prev) => [...prev, reply]);
           setIsThinking(false);
+
+          console.log("chatName returned", chatName);
+          if (chatName) {
+            setChats((chatList) =>
+              chatList.map((c) =>
+                c.chatId === chatId ? { ...c, name: chatName } : c,
+              ),
+            );
+          }
         });
     },
     [chatId, llm],
