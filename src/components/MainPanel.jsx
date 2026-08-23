@@ -96,7 +96,7 @@ export default function MainPanel() {
   const addUserMessage = useCallback((text) => {
     setMessages((prev) => [
       ...prev,
-      constructMessage(prev.length + 1, "me", text),
+      constructMessage(prev.length + 1, "user", text),
     ]);
 
     setIsThinking(true);

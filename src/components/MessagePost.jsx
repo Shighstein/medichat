@@ -11,7 +11,7 @@ marked.use({
 });
 
 function MessagePost({ msg }) {
-  const isMe = msg.from === "me";
+  const isMe = msg.role === "user";
   return (
     <div className={`message ${isMe ? "from-me" : "from-them"}`}>
       <div

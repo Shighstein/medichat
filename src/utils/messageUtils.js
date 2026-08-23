@@ -1,7 +1,7 @@
-export function constructMessage(id, from, text) {
+export function constructMessage(id, role, text) {
   return {
     id,
-    from,
+    role,
     text,
     ts: new Date().toLocaleDateString([], {
       hour: "2-digit",

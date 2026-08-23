@@ -50,7 +50,7 @@ if (!fs.existsSync(ARCHIVE_DIR)) {
 app.post("/api/chats", async (req, res) => {
   const chatId = Date.now().toString(); // TODO: come up with better naming
   const initialMessage = [
-    constructMessage(1, "them", "Hi there! Ask me anything!"),
+    constructMessage(1, "assistant", "Hi there! Ask me anything!"),
   ];
 
   await writeMessages(getChatPath(chatId), initialMessage);
@@ -111,13 +111,13 @@ app.get("/api/messages/:chatId", async (req, res) => {
 app.post("/api/messages/:chatId", async (req, res) => {
   const chatPath = getChatPath(req.params.chatId);
   const messages = await readMessages(chatPath);
-  const message = constructMessage(messages.length + 1, "me", req.body.text);
+  const message = constructMessage(messages.length + 1, "user", req.body.text);
   messages.push(message);
   await writeMessages(chatPath, messages);
 
   // history
   const history = messages.map((m) => ({
-    role: m.from === "me" ? "user" : "assistant",
+    role: m.role,
     content: m.text,
   }));
 
@@ -126,8 +126,6 @@ app.post("/api/messages/:chatId", async (req, res) => {
   if (req.body.llm === "claude") {
     response = await getResponseFromClaude(history);
   } else {
-    // response = await getResponseFromOllama(history);
-
     [response, chatName] = await Promise.all([
       getResponseFromOllama(history),
       (await shouldRenameChat(req.params.chatId, history))
@@ -138,11 +136,11 @@ app.post("/api/messages/:chatId", async (req, res) => {
 
   const data = await response.json();
   const replyText = data.message.content;
-  const updated = await readMessages(chatPath);
-  const reply = constructMessage(updated.length + 1, "them", replyText);
 
-  updated.push(reply);
-  await writeMessages(chatPath, updated);
+  const reply = constructMessage(messages.length + 1, "assitant", replyText);
+
+  messages.push(reply);
+  await writeMessages(chatPath, messages);
 
   if (chatName) {
     const index = await chatIndex();
@@ -206,7 +204,14 @@ async function getResponseFromOllama(history) {
     body: JSON.stringify({
       model: "llama3.1",
       stream: false,
-      messages: history,
+      messages: [
+        ...history,
+        {
+          role: "user",
+          content:
+            "Suggest which doctors to seek and good questions I might ask them as well as possible diagnosis, if available",
+        },
+      ],
     }),
   });
 
