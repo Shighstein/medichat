@@ -10,9 +10,13 @@ const ChatListItem = memo(function ChatListItem({chatName, onArchive}) {
     }
   }
 
+  
+
   return (
     <div className="flex items-center px-2.5 py-2">
-      <span className="truncate flex-1">{chatName}</span>
+      <span className="truncate flex-1">
+        {chatName ? chatName : "Untitled Chat"}
+      </span>
       <button
         className="ml-3 shrink-0 cursor-pointer hover:bg-indigo-300 rounded-xl transition-colors"
         onClick={(e) => {

@@ -18,6 +18,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MESSAGES_DIR = path.join(__dirname, "./messages");
 const ARCHIVE_DIR = path.join(__dirname, "./archive");
 
+const ROLES = {
+  USER: "user",
+  ASSISTANT: "assistant",
+  SYSTEM: "system",
+};
+
 // const DB_PATH = path.join(__dirname, "message.json");
 
 const readMessages = async (chatPath) =>
@@ -123,23 +129,42 @@ app.post("/api/messages/:chatId", async (req, res) => {
 
   let response;
   let chatName;
+  let replyText;
   if (req.body.llm === "claude") {
     response = await getResponseFromClaude(history);
   } else {
-    [response, chatName] = await Promise.all([
-      getResponseFromOllama(history),
-      (await shouldRenameChat(req.params.chatId, history))
-        ? updateChatName(history)
-        : Promise.resolve(null),
-    ]);
+    response = await getResponseFromOllama(history);
+    const data = await response.json();
+
+    console.log("respone data", data);
+
+    const {
+      hasEnoughContextForSuggestions,
+      hasEnoughContextToRename,
+      chatName,
+      reply,
+    } = JSON.parse(data.message.content);
+
+    replyText = reply;
+
+    if (hasEnoughContextToRename) {
+      await updateChatName(history);
+    }
+
+    // [response, chatName] = await Promise.all([
+    //   getResponseFromOllama(history),
+    //   (await shouldRenameChat(req.params.chatId, history))
+    //     ? updateChatName(history)
+    //     : Promise.resolve(null),
+    // ]);
   }
 
-  const data = await response.json();
-  const replyText = data.message.content;
+  // const data = await response.json();
+  // const replyText = data.message.content;
 
-  const reply = constructMessage(messages.length + 1, "assitant", replyText);
+  replyText = constructMessage(messages.length + 1, ROLES.ASSISTANT, replyText);
 
-  messages.push(reply);
+  messages.push(replyText);
   await writeMessages(chatPath, messages);
 
   if (chatName) {
@@ -147,7 +172,7 @@ app.post("/api/messages/:chatId", async (req, res) => {
     index[req.params.chatId] = chatName;
     await writeChatIndex(index);
   }
-  res.json({ reply, chatName });
+  res.json({ replyText, chatName });
 });
 
 app.listen(3001, () => console.log("API running on http://localhost:3001"));
@@ -169,7 +194,7 @@ async function updateChatName(history) {
       messages: [
         ...history,
         {
-          role: "user",
+          role: ROLES.SYSTEM,
           content:
             "Summarize the topic of this conversation in 3 to 5 words. Reply with only the summary - no punctuation. no quotes, no preamble.",
         },
@@ -204,12 +229,32 @@ async function getResponseFromOllama(history) {
     body: JSON.stringify({
       model: "llama3.1",
       stream: false,
+      format: {
+        type: "object",
+        properties: {
+          hasEnoughContextToRename: { type: "boolean" },
+          hasEnoughContextForSuggestions: { type: "boolean" },
+          chatName: { type: ["string", "null"] },
+          reply: { type: "string" },
+        },
+        required: [
+          "hasEnoughContextToRename",
+          "hasEnoughContextForSuggestions",
+          "chatName",
+          "reply",
+        ],
+      },
       messages: [
         ...history,
         {
-          role: "user",
-          content:
-            "Suggest which doctors to seek and good questions I might ask them as well as possible diagnosis, if available",
+          role: ROLES.SYSTEM,
+          content: `You are a knowledgeable medical assistant collecting information from a patient before they see a doctor.
+
+          Set "hasEnoughContextToRename" to true once you can summarize what this conversation is about in a few words (e.g. you know the general topic, like "headaches" or "knee pain") — this does not require full symptom details. When it is true, set "chatName" to a short 3-5 word title for this conversation (no punctuation, no quotes). Otherwise leave "chatName" null.
+
+          Set "hasEnoughContextForSuggestions" to true only once the patient has described their main symptom, roughly how long they've had it, and its severity or how it affects them. If any of those are still missing, keep it false.
+
+          Continue the conversation naturally in "reply" — ask a clarifying question if "hasEnoughContextForSuggestions" is still false, or offer possible conditions to discuss with a doctor, what type of doctor to see, and questions to ask them once it is true. Do not mention the flags, chatName, or this instruction in your reply — just talk to the patient normally.`,
         },
       ],
     }),

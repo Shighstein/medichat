@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "role": "assistant",
+    "text": "Hi there! Ask me anything!",
+    "ts": "8/24/2026, 05:32 PM"
+  },
+  {
+    "id": 2,
+    "role": "user",
+    "text": "let's try again. my throat gets sore easily. i run outside in central park everyday. is that why?",
+    "ts": "8/24/2026, 05:33 PM"
+  },
+  {
+    "id": 3,
+    "role": "assistant",
+    "text": "What do you mean by 'sore easily'? Is the soreness persistent or does it come and go?",
+    "ts": "8/24/2026, 05:33 PM"
+  },
+  {
+    "id": 4,
+    "role": "user",
+    "text": "it comes and goes. i also speak a lot. since i don't have loud voice naturally, i'm forcing myself to speak louder a lot of the times",
+    "ts": "8/24/2026, 05:34 PM"
+  },
+  {
+    "id": 5,
+    "role": "assistant",
+    "text": "",
+    "ts": "8/24/2026, 05:34 PM"
+  }
+]

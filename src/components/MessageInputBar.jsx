@@ -13,12 +13,12 @@ function MessageInputBar({ draft, onChange, onKeyDown, onSend }) {
         onKeyDown={onKeyDown}
       />
       <button
-        className="send-button button px-4 cursor-pointe bg-linear-to-b from-pink-100 to-pink-0 border-b-2 border-indigo-50"
+        className="send-button button px-4 cursor-pointe bg-linear-to-br from-pink-500 to-purple-500 border-b-2 border-indigo-50"
         type="button"
         onClick={onSend}
       >
         <img
-          src="src/images/send-outline-nofill-purple.svg"
+          src="src/images/send-outline-nofill-white.svg"
           atl="send"
           width="20"
           height="20"

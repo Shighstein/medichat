@@ -28,9 +28,6 @@ const ChatList = memo(function ChatList({
       <ul className="">
         {chats.length > 0 &&
           chats.map((chat) => {
-            const chatLabel = chat.chatId ?? "Chat";
-            const chatKey = chatLabel;
-
             return (
               <li
                 key={chat.chatId}

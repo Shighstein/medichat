@@ -49,9 +49,9 @@
 }
 
 .message.from-me {
-  @apply self-end  bg-linear-to-br from-pink-200 to-purple-50 ml-10;
+  @apply self-end  bg-linear-to-br from-pink-500 to-purple-500 ml-10 text-white;
 }
 
 .message.from-them {
-  @apply self-start flex-row-reverse mr-10 bg-linear-to-br from-indigo-200 to-purple-50;
+  @apply self-start flex-row-reverse mr-10 bg-linear-to-br from-indigo-100 to-purple-100;
 }

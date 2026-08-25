@@ -112,8 +112,8 @@ export default function MainPanel() {
         body: JSON.stringify({ text, llm }),
       })
         .then((r) => r.json())
-        .then(({ reply, chatName }) => {
-          setMessages((prev) => [...prev, reply]);
+        .then(({ replyText, chatName }) => {
+          setMessages((prev) => [...prev, replyText]);
           setIsThinking(false);
 
           console.log("chatName returned", chatName);
