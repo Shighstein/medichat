@@ -3,25 +3,22 @@ import globals from "globals";
 import prettier from "eslint-config-prettier";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsparser from "@typescript-eslint/parser";
-import { parser } from "marked";
-import { sortUserPlugins } from "vite";
-import { rules } from "@eslint/js/src/configs/eslint-recommended";
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
   js.configs.recommended,
   {
-    files: ["**/*.js"],
+    files: ["**/*.{js,jsx,ts,tsx}"],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
+      parser: tsparser,
       parserOptions: {
-        parser: tsparser,
         ecmaFeatures: {
           jsx: true,
         },
       },
     },
-    sortUserPlugins: {
+    plugins: {
       "@typescript-eslint": tseslint,
     },
     rules: {

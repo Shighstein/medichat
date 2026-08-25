@@ -1,12 +1,12 @@
 import { useState, useEffect, useContext, useRef, useCallback } from "react";
-import { LLModelContext } from "../LLModelContext.jsx";
-import { ChatIdContext } from "../ChatIdContext.jsx";
+import { LLModelContext } from "../LLModelContext";
+import { ChatIdContext } from "../ChatIdContext";
 import ChatList from "./ChatList";
-import Header from "./Header.jsx";
+import Header from "./Header";
 import { constructMessage } from "../utils/messageUtils.js";
 import "./MainPanel.css";
-import ChatContent from "./ChatContent.jsx";
-import MessageInputBar from "./MessageInputBar.jsx";
+import ChatContent from "./ChatContent";
+import MessageInputBar from "./MessageInputBar";
 
 const CHAT_LIST_MIN_WIDTH = 150;
 const CHAT_LIST_MAX_WIDTH = 600;
