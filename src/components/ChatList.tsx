@@ -1,5 +1,6 @@
 import { memo } from "react";
 import ChatListItem from "./ChatListItem";
+import { Chat } from "../types/chat";
 
 const ChatList = memo(function ChatList({
   chats,
@@ -7,13 +8,15 @@ const ChatList = memo(function ChatList({
   onChatSelected,
   onArchiveChat,
   selectedChatId,
+}: {
+  chats: Chat[];
+  onStartNewChat: () => void;
+  onChatSelected: (chatid: string) => void;
+  onArchiveChat: (chatId: string) => void;
+  selectedChatId: string | null;
 }) {
-  function getChatListClassName(isSelected) {
+  function getChatListClassName(isSelected: boolean) {
     return isSelected ? "chat-list-item selected" : "chat-list-item";
-  }
-
-  function getChatName(date) {
-    return new Date(parseInt(date)).toLocaleString();
   }
 
   return (

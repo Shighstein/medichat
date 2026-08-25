@@ -2,7 +2,7 @@ import { memo, useContext } from 'react';
 import { LLModelContext } from '../LLModelContext';
 
 const Header = memo(function Header() {
-  const {llm, setLlm} = useContext(LLModelContext);
+  const { setLlm } = useContext(LLModelContext);
 
   return (
     <div className="pb-2">

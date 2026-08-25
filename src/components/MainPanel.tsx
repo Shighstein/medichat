@@ -1,4 +1,11 @@
-import { useState, useEffect, useContext, useRef, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+  useCallback,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 import { LLModelContext } from "../LLModelContext";
 import { ChatIdContext } from "../ChatIdContext";
 import ChatList from "./ChatList";
@@ -7,22 +14,26 @@ import { constructMessage } from "../utils/messageUtils.js";
 import "./MainPanel.css";
 import ChatContent from "./ChatContent";
 import MessageInputBar from "./MessageInputBar";
+import { Message, ROLES } from "../types/message";
+import { Chat } from "../types/chat";
 
 const CHAT_LIST_MIN_WIDTH = 150;
 const CHAT_LIST_MAX_WIDTH = 600;
 
+type ResizeStart = { startX: number; startWidth: number };
+
 export default function MainPanel() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState("");
   const [isThinking, setIsThinking] = useState(false);
-  const [chats, setChats] = useState([]);
+  const [chats, setChats] = useState<Chat[]>([]);
   const [chatListWidth, setChatListWidth] = useState(200);
   const { chatId, setChatId } = useContext(ChatIdContext);
   const { llm } = useContext(LLModelContext);
 
-  const resizeStartRef = useRef(null);
+  const resizeStartRef = useRef<ResizeStart | null>(null);
 
-  const handleResizeMouseMove = useCallback((e) => {
+  const handleResizeMouseMove = useCallback((e: MouseEvent) => {
     if (!resizeStartRef.current) return;
     const { startX, startWidth } = resizeStartRef.current;
     const nextWidth = startWidth + (e.clientX - startX);
@@ -38,7 +49,7 @@ export default function MainPanel() {
   }, [handleResizeMouseMove]);
 
   const handleResizeMouseDown = useCallback(
-    (e) => {
+    (e: ReactMouseEvent<HTMLDivElement>) => {
       resizeStartRef.current = { startX: e.clientX, startWidth: chatListWidth };
       document.addEventListener("mousemove", handleResizeMouseMove);
       document.addEventListener("mouseup", handleResizeMouseUp);
@@ -64,12 +75,12 @@ export default function MainPanel() {
       });
   }, [fetchChats]);
 
-  const chatSelected = useCallback((id) => {
+  const chatSelected = useCallback((id: string) => {
     setChatId(id);
   }, []);
 
   const archiveChat = useCallback(
-    (id) => {
+    (id: string) => {
       console.log("archiving chat", id);
       fetch(`http://localhost:3001/api/chats/${id}`, {
         method: "DELETE",
@@ -84,26 +95,17 @@ export default function MainPanel() {
     [chatId, fetchChats],
   );
 
-  const send = useCallback(() => {
-    const text = draft.trim();
-    if (!text) return;
-
-    addUserMessage(text);
-    addAssistanceMessage(text);
-    setDraft("");
-  });
-
-  const addUserMessage = useCallback((text) => {
-    setMessages((prev) => [
+  const addUserMessage = useCallback((text: string) => {
+    setMessages((prev: Message[]) => [
       ...prev,
-      constructMessage(prev.length + 1, "user", text),
+      constructMessage(prev.length + 1, ROLES.USER, text),
     ]);
 
     setIsThinking(true);
   }, []);
 
   const addAssistanceMessage = useCallback(
-    (text) => {
+    (text: string) => {
       fetch(`http://localhost:3001/api/messages/${chatId}`, {
         method: "POST",
         headers: {
@@ -128,6 +130,15 @@ export default function MainPanel() {
     },
     [chatId, llm],
   );
+
+  const send = useCallback(() => {
+    const text = draft.trim();
+    if (!text) return;
+
+    addUserMessage(text);
+    addAssistanceMessage(text);
+    setDraft("");
+  }, [draft, addUserMessage, addAssistanceMessage]);
 
   useEffect(() => {
     fetchChats();

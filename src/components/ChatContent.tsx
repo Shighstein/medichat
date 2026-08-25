@@ -1,8 +1,15 @@
-import { memo, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import MessagePost from "./MessagePost";
+import { Message } from "../types/message";
 
-function ChatContent({ messages, isThinking }) {
-  const bottomRef = useRef(null);
+function ChatContent({
+  messages,
+  isThinking,
+}: {
+  messages: Message[];
+  isThinking: boolean;
+}) {
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

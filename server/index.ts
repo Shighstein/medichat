@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+// import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
@@ -6,9 +6,10 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { constructMessage } from "../src/utils/messageUtils.js";
+import { Message, ROLES } from "../src/types/message";
 
 dotenv.config();
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const app = express();
 app.use(cors());
@@ -18,21 +19,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const MESSAGES_DIR = path.join(__dirname, "./messages");
 const ARCHIVE_DIR = path.join(__dirname, "./archive");
 
-const ROLES = {
-  USER: "user",
-  ASSISTANT: "assistant",
-  SYSTEM: "system",
-};
-
 // const DB_PATH = path.join(__dirname, "message.json");
 
-const readMessages = async (chatPath) =>
+const readMessages = async (chatPath: string) =>
   JSON.parse(await fs.promises.readFile(chatPath, "utf-8"));
 
-const writeMessages = async (chatPath, mesgs) =>
+const writeMessages = async (chatPath: string, mesgs: Message[]) =>
   await fs.promises.writeFile(chatPath, JSON.stringify(mesgs, null, 2));
 
-const getChatPath = (chatId) =>
+const getChatPath = (chatId: string) =>
   path.join(MESSAGES_DIR, `messages_${chatId}.json`);
 
 const chatIndex = async () => {
@@ -40,7 +35,7 @@ const chatIndex = async () => {
   return JSON.parse(await fs.promises.readFile(file, "utf-8"));
 };
 
-const writeChatIndex = async (index) => {
+const writeChatIndex = async (index: string) => {
   const file = path.join(__dirname, `chat-index.json`);
   await fs.promises.writeFile(file, JSON.stringify(index, null, 2));
 };
@@ -56,14 +51,13 @@ if (!fs.existsSync(ARCHIVE_DIR)) {
 app.post("/api/chats", async (req, res) => {
   const chatId = Date.now().toString(); // TODO: come up with better naming
   const initialMessage = [
-    constructMessage(1, "assistant", "Hi there! Ask me anything!"),
+    constructMessage(1, ROLES.ASSISTANT, "Hi there! Ask me anything!"),
   ];
 
   await writeMessages(getChatPath(chatId), initialMessage);
 
   res.json({ chatId });
 });
-
 
 async function parseChatNames() {
   const chatNameIndex = await chatIndex();
@@ -75,7 +69,10 @@ async function parseChatNames() {
       chatId: f.replace("messages_", "").replace(".json", ""),
       createdAt: fs.statSync(path.join(MESSAGES_DIR, f)).birthtime,
     }))
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 
   return files.map((f) => ({
     chatId: f.chatId,
@@ -99,7 +96,7 @@ app.delete("/api/chats/:chatId", async (req, res) => {
     await fs.promises.rename(source, destination);
     res.status(204).end();
   } catch (err) {
-    res.status(404).json({ error: "Chat not found" });
+    res.status(404).json({ error: "Chat not found", detail: err });
   }
 });
 
@@ -109,7 +106,7 @@ app.get("/api/messages/:chatId", async (req, res) => {
     const messages = await readMessages(getChatPath(req.params.chatId));
     res.json(messages);
   } catch (err) {
-    res.status(404).json({ error: "Chat not found" });
+    res.status(404).json({ error: "Chat not found", detail: err });
   }
 });
 
@@ -117,18 +114,22 @@ app.get("/api/messages/:chatId", async (req, res) => {
 app.post("/api/messages/:chatId", async (req, res) => {
   const chatPath = getChatPath(req.params.chatId);
   const messages = await readMessages(chatPath);
-  const message = constructMessage(messages.length + 1, "user", req.body.text);
+  const message = constructMessage(
+    messages.length + 1,
+    ROLES.USER,
+    req.body.text,
+  );
   messages.push(message);
   await writeMessages(chatPath, messages);
 
   // history
-  const history = messages.map((m) => ({
+  const history = messages.map((m: Message) => ({
     role: m.role,
     content: m.text,
   }));
 
   let response;
-  let chatName;
+  let chat_name;
   let replyText;
   if (req.body.llm === "claude") {
     response = await getResponseFromClaude(history);
@@ -139,6 +140,7 @@ app.post("/api/messages/:chatId", async (req, res) => {
     console.log("respone data", data);
 
     const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       hasEnoughContextForSuggestions,
       hasEnoughContextToRename,
       chatName,
@@ -146,6 +148,7 @@ app.post("/api/messages/:chatId", async (req, res) => {
     } = JSON.parse(data.message.content);
 
     replyText = reply;
+    chat_name = chatName;
 
     if (hasEnoughContextToRename) {
       await updateChatName(history);
@@ -167,24 +170,19 @@ app.post("/api/messages/:chatId", async (req, res) => {
   messages.push(replyText);
   await writeMessages(chatPath, messages);
 
-  if (chatName) {
+  if (chat_name) {
     const index = await chatIndex();
-    index[req.params.chatId] = chatName;
+    index[req.params.chatId] = chat_name;
     await writeChatIndex(index);
   }
-  res.json({ replyText, chatName });
+  res.json({ replyText, chat_name });
 });
 
 app.listen(3001, () => console.log("API running on http://localhost:3001"));
 
 // helpers
 
-async function shouldRenameChat(chatId, history) {
-  const chatNameIndex = await chatIndex();
-  return history.length > 3 && !chatNameIndex[chatId];
-}
-
-async function updateChatName(history) {
+async function updateChatName(history: Message[]) {
   const response = await fetch("http://localhost:11434/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -206,8 +204,8 @@ async function updateChatName(history) {
   return data.message.content.trim();
 }
 
-
-async function getResponseFromClaude(history) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function getResponseFromClaude(history: Message[]) {
   throw new Error(
     "Claude integration is not enabled for the time being. Please use Ollama instead",
   );
@@ -222,7 +220,7 @@ async function getResponseFromClaude(history) {
   // return response;
 }
 
-async function getResponseFromOllama(history) {
+async function getResponseFromOllama(history: Message[]) {
   const response = await fetch("http://localhost:11434/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

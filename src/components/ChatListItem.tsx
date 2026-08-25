@@ -1,16 +1,17 @@
-import { memo, useContext } from 'react';
-import { ChatIdContext } from '../ChatIdContext';
+import { memo } from "react";
 
-const ChatListItem = memo(function ChatListItem({chatName, onArchive}) {
-  const { chatId, setChatId } = useContext(ChatIdContext);
-
-  function deleteClicked() {
+const ChatListItem = memo(function ChatListItem({
+  chatName,
+  onArchive,
+}: {
+  chatName: string;
+  onArchive: () => void;
+}) {
+  function deleteClicked(): void {
     if (window.confirm(`Are you sure you want to delete "${chatName}"?`)) {
       onArchive();
     }
   }
-
-  
 
   return (
     <div className="flex items-center px-2.5 py-2">
@@ -28,7 +29,6 @@ const ChatListItem = memo(function ChatListItem({chatName, onArchive}) {
       </button>
     </div>
   );
-
 });
 
 export default ChatListItem;

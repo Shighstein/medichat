@@ -1,17 +1,27 @@
-import { createContext, useState } from "react";
+import {
+  createContext,
+  Dispatch,
+  PropsWithChildren,
+  SetStateAction,
+  useState,
+} from "react";
 
-export const ChatIdContext = createContext({
+type ChatIdContextValue = {
+  chatId: string | null;
+  setChatId: Dispatch<SetStateAction<string | null>>;
+};
+
+export const ChatIdContext = createContext<ChatIdContextValue>({
   chatId: null,
-  setChatId: function(){}
+  setChatId: function () {},
 });
 
-export function ChatIdProvider({children}) {
-  const [chatId, setChatId] = useState(null);
+export function ChatIdProvider({ children }: PropsWithChildren) {
+  const [chatId, setChatId] = useState<string | null>(null);
 
   return (
-    <ChatIdContext.Provider value={{chatId, setChatId}}>
+    <ChatIdContext.Provider value={{ chatId, setChatId }}>
       {children}
     </ChatIdContext.Provider>
-  )
-
-};
+  );
+}

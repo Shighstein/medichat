@@ -1,12 +1,25 @@
-import { memo } from "react";
+import {
+  memo,
+  type ChangeEventHandler,
+  type KeyboardEventHandler,
+} from "react";
 
-function MessageInputBar({ draft, onChange, onKeyDown, onSend }) {
+function MessageInputBar({
+  draft,
+  onChange,
+  onKeyDown,
+  onSend,
+}: {
+  draft: string;
+  onChange: ChangeEventHandler<HTMLTextAreaElement>;
+  onKeyDown: KeyboardEventHandler<HTMLTextAreaElement>;
+  onSend: () => void;
+}) {
   return (
     <div className="input-bar border-t-2 border-gray-200 flex items-stretch self-stretch pl-3 bg-white">
       <textarea
         id="message-input"
         className="input-message flex-1 p-2"
-        type="text"
         placeholder={`Ask anything`}
         value={draft}
         onChange={onChange}
@@ -19,7 +32,7 @@ function MessageInputBar({ draft, onChange, onKeyDown, onSend }) {
       >
         <img
           src="src/images/send-outline-nofill-white.svg"
-          atl="send"
+          alt="send"
           width="20"
           height="20"
         />
