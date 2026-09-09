@@ -1,157 +1,165 @@
-import {
-  useState,
-  useEffect,
-  useContext,
-  useRef,
-  useCallback,
-  type MouseEvent as ReactMouseEvent,
-} from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { LLModelContext } from "../LLModelContext";
-import { ChatIdContext } from "../ChatIdContext";
 import ChatList from "./ChatList";
 import Header from "./Header";
 import { constructMessage } from "../utils/messageUtils.js";
 import "./MainPanel.css";
 import ChatContent from "./ChatContent";
 import MessageInputBar from "./MessageInputBar";
-import { Message, ROLES } from "../types/message";
-import { Chat } from "../types/chat";
-
-const CHAT_LIST_MIN_WIDTH = 150;
-const CHAT_LIST_MAX_WIDTH = 600;
-
-type ResizeStart = { startX: number; startWidth: number };
+import { Message, ROLES, Chat, ChatState } from "../types/types";
+import {
+  askLLM,
+  fetchChatNames,
+  getMessages,
+  moveChatFild,
+  startNewChat,
+} from "./api/apicalls";
+import { useResizableWidth } from "../utils/mouseEventUtils";
 
 export default function MainPanel() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [draft, setDraft] = useState("");
-  const [isThinking, setIsThinking] = useState(false);
-  const [chats, setChats] = useState<Chat[]>([]);
-  const [chatListWidth, setChatListWidth] = useState(200);
-  const { chatId, setChatId } = useContext(ChatIdContext);
+  const [state, setState] = useState<ChatState>({
+    chatList: [],
+    selectedChatId: "",
+    isThinking: false,
+    draft: "",
+    messages: [],
+  });
+
+  console.log("state:", state);
+
+  const chats = state.chatList;
+  const draft = state.draft;
+  const isThinking = state.isThinking;
+  const chatId = state.selectedChatId;
+  const messages = state.messages;
+
+  // const [messages, setMessages] = useState<Message[]>([]);
   const { llm } = useContext(LLModelContext);
 
-  const resizeStartRef = useRef<ResizeStart | null>(null);
+  const { width: chatListWidth, handleResizeMouseDown } = useResizableWidth();
 
-  const handleResizeMouseMove = useCallback((e: MouseEvent) => {
-    if (!resizeStartRef.current) return;
-    const { startX, startWidth } = resizeStartRef.current;
-    const nextWidth = startWidth + (e.clientX - startX);
-    setChatListWidth(
-      Math.min(CHAT_LIST_MAX_WIDTH, Math.max(CHAT_LIST_MIN_WIDTH, nextWidth)),
-    );
-  }, []);
-
-  const handleResizeMouseUp = useCallback(() => {
-    resizeStartRef.current = null;
-    document.removeEventListener("mousemove", handleResizeMouseMove);
-    document.removeEventListener("mouseup", handleResizeMouseUp);
-  }, [handleResizeMouseMove]);
-
-  const handleResizeMouseDown = useCallback(
-    (e: ReactMouseEvent<HTMLDivElement>) => {
-      resizeStartRef.current = { startX: e.clientX, startWidth: chatListWidth };
-      document.addEventListener("mousemove", handleResizeMouseMove);
-      document.addEventListener("mouseup", handleResizeMouseUp);
-    },
-    [chatListWidth, handleResizeMouseMove, handleResizeMouseUp],
-  );
-
-  const fetchChats = useCallback(() => {
-    fetch("http://localhost:3001/api/chats")
-      .then((r) => r.json())
-      .then(setChats);
-  }, []);
-
-  const startNewChat = useCallback(() => {
-    fetch("http://localhost:3001/api/chats", {
-      method: "POST",
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        setChatId(data.chatId);
-        setMessages([]);
-        fetchChats();
+  const loadChatList = useCallback(() => {
+    fetchChatNames().then((chats: Chat[]) => {
+      setState((prev) => {
+        return {
+          ...prev,
+          chatList: chats,
+        };
       });
-  }, [fetchChats]);
-
-  const chatSelected = useCallback((id: string) => {
-    setChatId(id);
+    });
   }, []);
+
+  const createNewChat = useCallback(() => {
+    startNewChat().then((data: { chatId: string }) => {
+      setState((prev) => {
+        return {
+          ...prev,
+          selectedChatId: data.chatId,
+          messages: [],
+        };
+      });
+    });
+  }, []);
+
+  const loadMessages = useCallback((id: string) => {
+    getMessages(id)
+      .then((res: Message[]) => {
+        console.log("res: ", res);
+        setState((prev) => {
+          return {
+            ...prev,
+            messages: res,
+          };
+        });
+      })
+      .catch((reason) => console.error(`failed ${reason}`));
+  }, []);
+
+  const selectChat = useCallback(
+    (id: string) => {
+      setState((prev) => {
+        return {
+          ...prev,
+          selectedChatId: id,
+        };
+      });
+      loadMessages(id);
+    },
+    [loadMessages],
+  );
 
   const archiveChat = useCallback(
     (id: string) => {
       console.log("archiving chat", id);
-      fetch(`http://localhost:3001/api/chats/${id}`, {
-        method: "DELETE",
-      }).then(() => {
+      moveChatFild(id).then(() => {
         if (chatId === id) {
-          setChatId(null);
-          setMessages([]);
+          setState((prev) => {
+            return {
+              ...prev,
+              selectedChatId: "",
+            };
+          });
         }
-        fetchChats();
+        loadChatList();
       });
     },
-    [chatId, fetchChats],
+    [chatId, loadChatList],
   );
 
-  const addUserMessage = useCallback((text: string) => {
-    setMessages((prev: Message[]) => [
-      ...prev,
-      constructMessage(prev.length + 1, ROLES.USER, text),
-    ]);
-
-    setIsThinking(true);
+  const addUserMessage = useCallback((text: string, chatId: string) => {
+    setState((prev: ChatState) => {
+      return {
+        ...prev,
+        isThinking: true,
+        messages: [
+          ...prev.messages,
+          constructMessage(messages.length + 1, ROLES.USER, text, chatId),
+        ],
+      };
+    });
   }, []);
 
   const addAssistanceMessage = useCallback(
-    (text: string) => {
-      fetch(`http://localhost:3001/api/messages/${chatId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text, llm }),
-      })
-        .then((r) => r.json())
-        .then(({ replyText, chatName }) => {
-          setMessages((prev) => [...prev, replyText]);
-          setIsThinking(false);
+    (text: string, chatId: string) => {
+      askLLM({ chatId, text, llm }).then(({ replyText, chatName }) => {
+        console.log("chatName returned", chatName);
 
-          console.log("chatName returned", chatName);
-          if (chatName) {
-            setChats((chatList) =>
-              chatList.map((c) =>
-                c.chatId === chatId ? { ...c, name: chatName } : c,
-              ),
-            );
-          }
+        setState((prev) => {
+          return {
+            ...prev,
+            isThinking: false,
+            messages: [...prev.messages, replyText],
+            chatList: prev.chatList.map((c) =>
+              c.chatId === chatId && chatName ? { ...c, name: chatName } : c,
+            ),
+          };
         });
+      });
     },
-    [chatId, llm],
+    [llm],
   );
 
-  const send = useCallback(() => {
-    const text = draft.trim();
-    if (!text) return;
+  const send = useCallback(
+    (chatId: string) => {
+      const text = draft.trim();
+      if (!text) return;
 
-    addUserMessage(text);
-    addAssistanceMessage(text);
-    setDraft("");
-  }, [draft, addUserMessage, addAssistanceMessage]);
+      addUserMessage(text, chatId);
+      addAssistanceMessage(text, chatId);
+
+      setState((prev) => {
+        return {
+          ...prev,
+          draft: "",
+        };
+      });
+    },
+    [draft, addUserMessage, addAssistanceMessage],
+  );
 
   useEffect(() => {
-    fetchChats();
+    loadChatList();
   }, []);
-
-  useEffect(() => {
-    if (!chatId) return;
-
-    fetch(`http://localhost:3001/api/messages/${chatId}`)
-      .then((r) => r.json())
-      .then(setMessages)
-      .catch((reason) => console.error(`failed ${reason}`));
-  }, [chatId]);
 
   return (
     <div className="main-panel">
@@ -161,8 +169,8 @@ export default function MainPanel() {
           <ChatList
             chats={chats}
             selectedChatId={chatId}
-            onStartNewChat={startNewChat}
-            onChatSelected={chatSelected}
+            onStartNewChat={createNewChat}
+            onChatSelected={selectChat}
             onArchiveChat={archiveChat}
           />
         </div>
@@ -174,15 +182,17 @@ export default function MainPanel() {
           <ChatContent messages={messages} isThinking={isThinking} />
           <MessageInputBar
             draft={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={(e) =>
+              setState((prev) => ({ ...prev, draft: e.target.value }))
+            }
             onKeyDown={(e) => {
               if (e.key === "Enter" && e.metaKey) {
                 e.preventDefault();
                 e.stopPropagation();
-                send();
+                send(state.selectedChatId);
               }
             }}
-            onSend={send}
+            onSend={() => send(state.selectedChatId)}
           />
         </div>
       </div>

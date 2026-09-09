@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import MessagePost from "./MessagePost";
-import { Message } from "../types/message";
+import { Message } from "../types/types";
 
 function ChatContent({
   messages,
@@ -14,6 +14,8 @@ function ChatContent({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isThinking]);
+
+  console.log("chat content", messages);
 
   return (
     // <div className="chat-content-wrapper flex grow">

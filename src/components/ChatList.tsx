@@ -1,6 +1,6 @@
 import { memo } from "react";
 import ChatListItem from "./ChatListItem";
-import { Chat } from "../types/chat";
+import { Chat } from "../types/types";
 
 const ChatList = memo(function ChatList({
   chats,

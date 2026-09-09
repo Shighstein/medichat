@@ -1,15 +1,12 @@
 import { createRoot } from "react-dom/client";
 import MainPanel from "./components/MainPanel";
 import { LLModelProvider } from "./LLModelContext";
-import { ChatIdProvider } from "./ChatIdContext";
 
 const App = () => {
   return (
     <>
       <LLModelProvider>
-        <ChatIdProvider>
-          <MainPanel />
-        </ChatIdProvider>
+        <MainPanel />
       </LLModelProvider>
     </>
   );

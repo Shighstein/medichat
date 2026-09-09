@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
-import { Message } from "../types/message";
+import { Message } from "../types/types";
 
 marked.use({
   renderer: {

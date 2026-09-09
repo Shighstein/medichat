@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { constructMessage } from "../src/utils/messageUtils.js";
-import { Message, ROLES } from "../src/types/message";
+import { Message, ROLES } from "../src/types/types";
 
 dotenv.config();
 // const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -30,12 +30,12 @@ const writeMessages = async (chatPath: string, mesgs: Message[]) =>
 const getChatPath = (chatId: string) =>
   path.join(MESSAGES_DIR, `messages_${chatId}.json`);
 
-const chatIndex = async () => {
+const chatIndex = async (): Promise<Record<string, string>> => {
   const file = path.join(__dirname, `chat-index.json`);
   return JSON.parse(await fs.promises.readFile(file, "utf-8"));
 };
 
-const writeChatIndex = async (index: string) => {
+const writeChatIndex = async (index: Record<string, string>) => {
   const file = path.join(__dirname, `chat-index.json`);
   await fs.promises.writeFile(file, JSON.stringify(index, null, 2));
 };
@@ -51,7 +51,7 @@ if (!fs.existsSync(ARCHIVE_DIR)) {
 app.post("/api/chats", async (req, res) => {
   const chatId = Date.now().toString(); // TODO: come up with better naming
   const initialMessage = [
-    constructMessage(1, ROLES.ASSISTANT, "Hi there! Ask me anything!"),
+    constructMessage(1, ROLES.ASSISTANT, "Hi there! Ask me anything!", chatId),
   ];
 
   await writeMessages(getChatPath(chatId), initialMessage);
@@ -103,7 +103,9 @@ app.delete("/api/chats/:chatId", async (req, res) => {
 // read the individual message file (chat content)
 app.get("/api/messages/:chatId", async (req, res) => {
   try {
-    const messages = await readMessages(getChatPath(req.params.chatId));
+    const messages: Message[] = await readMessages(
+      getChatPath(req.params.chatId),
+    );
     res.json(messages);
   } catch (err) {
     res.status(404).json({ error: "Chat not found", detail: err });
@@ -118,6 +120,7 @@ app.post("/api/messages/:chatId", async (req, res) => {
     messages.length + 1,
     ROLES.USER,
     req.body.text,
+    req.params.chatId,
   );
   messages.push(message);
   await writeMessages(chatPath, messages);
@@ -129,7 +132,7 @@ app.post("/api/messages/:chatId", async (req, res) => {
   }));
 
   let response;
-  let chat_name;
+  let chatname;
   let replyText;
   if (req.body.llm === "claude") {
     response = await getResponseFromClaude(history);
@@ -148,7 +151,7 @@ app.post("/api/messages/:chatId", async (req, res) => {
     } = JSON.parse(data.message.content);
 
     replyText = reply;
-    chat_name = chatName;
+    chatname = chatName;
 
     if (hasEnoughContextToRename) {
       await updateChatName(history);
@@ -165,17 +168,22 @@ app.post("/api/messages/:chatId", async (req, res) => {
   // const data = await response.json();
   // const replyText = data.message.content;
 
-  replyText = constructMessage(messages.length + 1, ROLES.ASSISTANT, replyText);
+  replyText = constructMessage(
+    messages.length + 1,
+    ROLES.ASSISTANT,
+    replyText,
+    req.params.chatId,
+  );
 
   messages.push(replyText);
   await writeMessages(chatPath, messages);
 
-  if (chat_name) {
+  if (chatname) {
     const index = await chatIndex();
-    index[req.params.chatId] = chat_name;
+    index[req.params.chatId] = chatname;
     await writeChatIndex(index);
   }
-  res.json({ replyText, chat_name });
+  res.json({ replyText, chatname });
 });
 
 app.listen(3001, () => console.log("API running on http://localhost:3001"));
@@ -243,7 +251,6 @@ async function getResponseFromOllama(history: Message[]) {
         ],
       },
       messages: [
-        ...history,
         {
           role: ROLES.SYSTEM,
           content: `You are a knowledgeable medical assistant collecting information from a patient before they see a doctor.
@@ -254,6 +261,7 @@ async function getResponseFromOllama(history: Message[]) {
 
           Continue the conversation naturally in "reply" — ask a clarifying question if "hasEnoughContextForSuggestions" is still false, or offer possible conditions to discuss with a doctor, what type of doctor to see, and questions to ask them once it is true. Do not mention the flags, chatName, or this instruction in your reply — just talk to the patient normally.`,
         },
+        ...history,
       ],
     }),
   });

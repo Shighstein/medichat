@@ -1,0 +1,93 @@
+[
+  {
+    "id": 1,
+    "role": "assistant",
+    "text": "Hi there! Ask me anything!",
+    "chatId": "1788913280235",
+    "ts": "9/8/2026, 08:21 PM"
+  },
+  {
+    "id": 2,
+    "role": "user",
+    "text": "middle of my back hurts.  i don't have fever. what could that be",
+    "chatId": "1788913280235",
+    "ts": "9/8/2026, 08:22 PM"
+  },
+  {
+    "id": 3,
+    "role": "assistant",
+    "text": "",
+    "chatId": "1788913280235",
+    "ts": "9/8/2026, 08:22 PM"
+  },
+  {
+    "id": 4,
+    "role": "user",
+    "text": "try again",
+    "chatId": "1788913280235",
+    "ts": "9/9/2026, 01:10 PM"
+  },
+  {
+    "id": 5,
+    "role": "assistant",
+    "text": "Can you tell me a bit more about the pain in your back? Is it a sharp pain or a dull ache? How long have you been experiencing this pain?",
+    "chatId": "1788913280235",
+    "ts": "9/9/2026, 01:10 PM"
+  },
+  {
+    "id": 6,
+    "role": "user",
+    "text": "it's more of an ache.  it's been about a week",
+    "chatId": "1788913280235",
+    "ts": "9/9/2026, 01:10 PM"
+  },
+  {
+    "id": 7,
+    "role": "assistant",
+    "text": "",
+    "chatId": "1788913280235",
+    "ts": "9/9/2026, 01:10 PM"
+  },
+  {
+    "id": 8,
+    "role": "user",
+    "text": "try again",
+    "chatId": "1788913280235",
+    "ts": "9/9/2026, 01:18 PM"
+  },
+  {
+    "id": 9,
+    "role": "assistant",
+    "text": "Okay, so it's been a week of a dull ache in your back. Does it get worse at any particular time, like when you're sitting or standing, or when you move a certain way?",
+    "chatId": "1788913280235",
+    "ts": "9/9/2026, 01:18 PM"
+  },
+  {
+    "id": 10,
+    "role": "user",
+    "text": "usually when i wake up in the morning",
+    "chatId": "1788913280235",
+    "ts": "9/9/2026, 01:19 PM"
+  },
+  {
+    "id": 11,
+    "role": "assistant",
+    "text": "That's a good clue. So it's more of a stiffness or soreness in the morning, and then it might improve a bit throughout the day. Have you noticed any triggers that might be contributing to the pain, such as lifting something heavy or bending in a certain way?",
+    "chatId": "1788913280235",
+    "ts": "9/9/2026, 01:19 PM"
+  },
+  {
+    "id": 12,
+    "role": "user",
+    "text": "i have been weight training but i haven't increased weight.  but i have increased the mileage that i run and the upped the speed as well",
+    "chatId": "1788913280235",
+    "ts": "9/9/2026, 01:19 PM"
+  },
+  {
+    "id": 13,
+    "role": "assistant",
+    "text": "It's possible that the increase in running mileage and intensity could be contributing to the back pain. Have you noticed any numbness or tingling in your legs when you run? It might also be worth discussing with the doctor whether you need to modify your exercise routine to avoid putting additional stress on your back.",
+    "chatId": "1788913280235",
+    "ts": "9/9/2026, 01:20 PM"
+  }
+]
