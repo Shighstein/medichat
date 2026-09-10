@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import { useState, useEffect, useContext, useCallback, useRef } from "react";
 import { LLModelContext } from "../LLModelContext";
 import ChatList from "./ChatList";
 import Header from "./Header";
@@ -11,7 +11,7 @@ import {
   askLLM,
   fetchChatNames,
   getMessages,
-  moveChatFild,
+  moveChatFile,
   startNewChat,
 } from "./api/apicalls";
 import { useResizableWidth } from "../utils/mouseEventUtils";
@@ -33,10 +33,10 @@ export default function MainPanel() {
   const chatId = state.selectedChatId;
   const messages = state.messages;
 
-  // const [messages, setMessages] = useState<Message[]>([]);
   const { llm } = useContext(LLModelContext);
-
   const { width: chatListWidth, handleResizeMouseDown } = useResizableWidth();
+
+  const loadMessageRef = useRef<AbortController | null>(null);
 
   const loadChatList = useCallback(() => {
     fetchChatNames().then((chats: Chat[]) => {
@@ -62,7 +62,10 @@ export default function MainPanel() {
   }, []);
 
   const loadMessages = useCallback((id: string) => {
-    getMessages(id)
+    loadMessageRef.current?.abort();
+    loadMessageRef.current = new AbortController();
+
+    getMessages(id, loadMessageRef.current.signal)
       .then((res: Message[]) => {
         console.log("res: ", res);
         setState((prev) => {
@@ -72,7 +75,13 @@ export default function MainPanel() {
           };
         });
       })
-      .catch((reason) => console.error(`failed ${reason}`));
+      .catch((reason) => {
+        if (reason.name === "AbortError") {
+          console.log("Fetch aborted");
+        } else {
+          console.error(`failed to load messages for chatId: ${id}. ${reason}`);
+        }
+      });
   }, []);
 
   const selectChat = useCallback(
@@ -81,6 +90,7 @@ export default function MainPanel() {
         return {
           ...prev,
           selectedChatId: id,
+          messages: [],
         };
       });
       loadMessages(id);
@@ -91,17 +101,22 @@ export default function MainPanel() {
   const archiveChat = useCallback(
     (id: string) => {
       console.log("archiving chat", id);
-      moveChatFild(id).then(() => {
-        if (chatId === id) {
-          setState((prev) => {
-            return {
-              ...prev,
-              selectedChatId: "",
-            };
-          });
-        }
-        loadChatList();
-      });
+      moveChatFile(id)
+        .then(() => {
+          if (chatId === id) {
+            setState((prev) => {
+              return {
+                ...prev,
+                selectedChatId: "",
+                messages: [],
+              };
+            });
+          }
+          loadChatList();
+        })
+        .catch((error) =>
+          console.error(`failed to archive chat ${id}: ${error}`),
+        );
     },
     [chatId, loadChatList],
   );
@@ -113,7 +128,7 @@ export default function MainPanel() {
         isThinking: true,
         messages: [
           ...prev.messages,
-          constructMessage(messages.length + 1, ROLES.USER, text, chatId),
+          constructMessage(prev.messages.length + 1, ROLES.USER, text, chatId),
         ],
       };
     });
@@ -158,8 +173,9 @@ export default function MainPanel() {
   );
 
   useEffect(() => {
+    loadMessageRef.current?.abort();
     loadChatList();
-  }, []);
+  }, [loadChatList]);
 
   return (
     <div className="main-panel">
@@ -189,10 +205,10 @@ export default function MainPanel() {
               if (e.key === "Enter" && e.metaKey) {
                 e.preventDefault();
                 e.stopPropagation();
-                send(state.selectedChatId);
+                send(chatId);
               }
             }}
-            onSend={() => send(state.selectedChatId)}
+            onSend={() => send(chatId)}
           />
         </div>
       </div>

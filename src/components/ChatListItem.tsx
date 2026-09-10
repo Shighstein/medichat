@@ -4,7 +4,7 @@ const ChatListItem = memo(function ChatListItem({
   chatName,
   onArchive,
 }: {
-  chatName: string;
+  chatName: string | null;
   onArchive: () => void;
 }) {
   function deleteClicked(): void {

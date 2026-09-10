@@ -18,7 +18,7 @@ export type Message = {
 export type Chat = {
   chatId: string;
   createdAt: Date;
-  name: string;
+  name: string | null;
 };
 
 export type ChatState = {

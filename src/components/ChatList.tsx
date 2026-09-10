@@ -25,7 +25,7 @@ const ChatList = memo(function ChatList({
         className="new-button button cursor-pointer p-4 flex flex-row bg-linear-to-b from-indigo-100 to-indigo-50"
         onClick={onStartNewChat}
       >
-        <span className="flex grow-1">New chat</span>
+        <span className="flex grow">New chat</span>
         <img src="src/images/plus-fill-purple.svg" height="20" width="20" />
       </button>
       <ul className="">

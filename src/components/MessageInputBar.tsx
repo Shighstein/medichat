@@ -1,8 +1,4 @@
-import {
-  memo,
-  type ChangeEventHandler,
-  type KeyboardEventHandler,
-} from "react";
+import { type ChangeEventHandler, type KeyboardEventHandler } from "react";
 
 function MessageInputBar({
   draft,
@@ -41,4 +37,4 @@ function MessageInputBar({
   );
 }
 
-export default memo(MessageInputBar);
+export default MessageInputBar;

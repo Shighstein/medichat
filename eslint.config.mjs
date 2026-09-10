@@ -3,6 +3,7 @@ import globals from "globals";
 import prettier from "eslint-config-prettier";
 import tseslint from "@typescript-eslint/eslint-plugin";
 import tsparser from "@typescript-eslint/parser";
+import reactHooks from "eslint-plugin-react-hooks";
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -20,9 +21,12 @@ export default [
     },
     plugins: {
       "@typescript-eslint": tseslint,
+      "react-hooks": reactHooks,
     },
     rules: {
       ...tseslint.configs.recommended.rules,
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "error",
     },
   },
   prettier,

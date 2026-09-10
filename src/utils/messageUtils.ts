@@ -1,4 +1,4 @@
-import { Message, ROLES } from "../types/message";
+import { Message, ROLES } from "../types/types";
 
 export function constructMessage(
   id: number,

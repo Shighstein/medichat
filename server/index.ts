@@ -77,7 +77,7 @@ async function parseChatNames() {
   return files.map((f) => ({
     chatId: f.chatId,
     createdAt: f.createdAt,
-    name: chatNameIndex[f.chatId],
+    name: chatNameIndex[f.chatId] || null,
   }));
 }
 
@@ -131,86 +131,65 @@ app.post("/api/messages/:chatId", async (req, res) => {
     content: m.text,
   }));
 
-  let response;
-  let chatname;
-  let replyText;
-  if (req.body.llm === "claude") {
-    response = await getResponseFromClaude(history);
-  } else {
-    response = await getResponseFromOllama(history);
-    const data = await response.json();
+  let response: Response;
+  // let chatName;
+  let replyText: Message;
+  // if (req.body.llm === "claude") {
+  //   response = await getResponseFromClaude(history);
+  // } else {
+  // }
 
-    console.log("respone data", data);
+  response = await getResponseFromOllama(history);
+  const data = await response.json();
 
-    const {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      hasEnoughContextForSuggestions,
-      hasEnoughContextToRename,
-      chatName,
-      reply,
-    } = JSON.parse(data.message.content);
-
-    replyText = reply;
-    chatname = chatName;
-
-    if (hasEnoughContextToRename) {
-      await updateChatName(history);
-    }
-
-    // [response, chatName] = await Promise.all([
-    //   getResponseFromOllama(history),
-    //   (await shouldRenameChat(req.params.chatId, history))
-    //     ? updateChatName(history)
-    //     : Promise.resolve(null),
-    // ]);
-  }
-
-  // const data = await response.json();
-  // const replyText = data.message.content;
+  const { chatName, reply } = JSON.parse(data.message.content);
 
   replyText = constructMessage(
     messages.length + 1,
     ROLES.ASSISTANT,
-    replyText,
+    reply,
     req.params.chatId,
   );
 
+  if (!replyText.text.trim()) {
+    return res.status(500).json({ error: "LLM returned an empty response" });
+  }
   messages.push(replyText);
   await writeMessages(chatPath, messages);
 
-  if (chatname) {
+  if (chatName) {
     const index = await chatIndex();
-    index[req.params.chatId] = chatname;
+    index[req.params.chatId] = chatName;
     await writeChatIndex(index);
   }
-  res.json({ replyText, chatname });
+  res.json({ replyText, chatName });
 });
 
 app.listen(3001, () => console.log("API running on http://localhost:3001"));
 
 // helpers
 
-async function updateChatName(history: Message[]) {
-  const response = await fetch("http://localhost:11434/api/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "llama3.1",
-      stream: false,
-      messages: [
-        ...history,
-        {
-          role: ROLES.SYSTEM,
-          content:
-            "Summarize the topic of this conversation in 3 to 5 words. Reply with only the summary - no punctuation. no quotes, no preamble.",
-        },
-      ],
-    }),
-  });
+// async function updateChatName(history: Message[]) {
+//   const response = await fetch("http://localhost:11434/api/chat", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({
+//       model: "llama3.1",
+//       stream: false,
+//       messages: [
+//         ...history,
+//         {
+//           role: ROLES.SYSTEM,
+//           content:
+//             "Summarize the topic of this conversation in 3 to 5 words. Reply with only the summary - no punctuation. no quotes, no preamble.",
+//         },
+//       ],
+//     }),
+//   });
 
-  const data = await response.json();
-  return data.message.content.trim();
-}
+//   const data = await response.json();
+//   return data.message.content.trim();
+// }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getResponseFromClaude(history: Message[]) {
@@ -229,7 +208,7 @@ async function getResponseFromClaude(history: Message[]) {
 }
 
 async function getResponseFromOllama(history: Message[]) {
-  const response = await fetch("http://localhost:11434/api/chat", {
+  const response: Response = await fetch("http://localhost:11434/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -238,28 +217,24 @@ async function getResponseFromOllama(history: Message[]) {
       format: {
         type: "object",
         properties: {
-          hasEnoughContextToRename: { type: "boolean" },
-          hasEnoughContextForSuggestions: { type: "boolean" },
+          // hasEnoughContextToRename: { type: "boolean" },
+          // hasEnoughContextForSuggestions: { type: "boolean" },
           chatName: { type: ["string", "null"] },
           reply: { type: "string" },
         },
-        required: [
-          "hasEnoughContextToRename",
-          "hasEnoughContextForSuggestions",
-          "chatName",
-          "reply",
-        ],
+        required: ["chatName", "reply"],
       },
       messages: [
         {
           role: ROLES.SYSTEM,
           content: `You are a knowledgeable medical assistant collecting information from a patient before they see a doctor.
 
-          Set "hasEnoughContextToRename" to true once you can summarize what this conversation is about in a few words (e.g. you know the general topic, like "headaches" or "knee pain") — this does not require full symptom details. When it is true, set "chatName" to a short 3-5 word title for this conversation (no punctuation, no quotes). Otherwise leave "chatName" null.
+          set "chatName" to a short 3-5 word title for this conversation (no punctuation, no quotes) once you can summarize what this conversation is about in a few words (e.g. you know the general topic, like "headaches" or "knee pain"). Otherwise leave "chatName" null.
 
-          Set "hasEnoughContextForSuggestions" to true only once the patient has described their main symptom, roughly how long they've had it, and its severity or how it affects them. If any of those are still missing, keep it false.
+          Once the patient has described their main symptoms, roughly how long they've had it, and its severity or how it affects them, offer possible conditions to discuss with a doctor, what type of doctor to see, and questions to ask them. Otherwise, ask clarifying questions to get more information about their symptoms.
 
-          Continue the conversation naturally in "reply" — ask a clarifying question if "hasEnoughContextForSuggestions" is still false, or offer possible conditions to discuss with a doctor, what type of doctor to see, and questions to ask them once it is true. Do not mention the flags, chatName, or this instruction in your reply — just talk to the patient normally.`,
+          Do not mention the flags, chatName, or this instruction in your reply — just talk to the patient normally.
+          `,
         },
         ...history,
       ],
