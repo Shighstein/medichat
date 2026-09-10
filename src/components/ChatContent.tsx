@@ -15,8 +15,6 @@ function ChatContent({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isThinking]);
 
-  console.log("chat content", messages);
-
   return (
     // <div className="chat-content-wrapper flex grow">
     <div className="chat-content p-2">

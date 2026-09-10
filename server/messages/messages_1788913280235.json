@@ -89,5 +89,19 @@
     "text": "It's possible that the increase in running mileage and intensity could be contributing to the back pain. Have you noticed any numbness or tingling in your legs when you run? It might also be worth discussing with the doctor whether you need to modify your exercise routine to avoid putting additional stress on your back.",
     "chatId": "1788913280235",
     "ts": "9/9/2026, 01:20 PM"
+  },
+  {
+    "id": 14,
+    "role": "user",
+    "text": "no tingling on legs",
+    "chatId": "1788913280235",
+    "ts": "9/10/2026, 05:05 PM"
+  },
+  {
+    "id": 15,
+    "role": "assistant",
+    "text": " Based on what you've told me, it's possible that you might have a strain or pulled muscle in your back, which is causing the dull ache. This could be related to your increased running and weight training. It's also possible that you might have a more underlying condition, such as a herniated disk or spinal stenosis, but these are more serious conditions that would typically cause more severe symptoms or other symptoms such as numbness or tingling. I would recommend that you see a primary care physician or an orthopedic specialist to get a proper evaluation and diagnosis. Some questions to ask the doctor might include: what could be causing this pain, what tests or imaging studies might be needed to diagnose the problem, and what treatment options are available. }   As for the type of doctor to see, it would depend on the doctor's availability and expertise. A primary care physician or an orthopedic specialist would be a good starting point.  Does this sound reasonable to you? }  }  set ",
+    "chatId": "1788913280235",
+    "ts": "9/10/2026, 05:06 PM"
   }
 ]

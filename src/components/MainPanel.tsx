@@ -25,8 +25,6 @@ export default function MainPanel() {
     messages: [],
   });
 
-  console.log("state:", state);
-
   const chats = state.chatList;
   const draft = state.draft;
   const isThinking = state.isThinking;
@@ -67,7 +65,6 @@ export default function MainPanel() {
 
     getMessages(id, loadMessageRef.current.signal)
       .then((res: Message[]) => {
-        console.log("res: ", res);
         setState((prev) => {
           return {
             ...prev,
@@ -77,7 +74,7 @@ export default function MainPanel() {
       })
       .catch((reason) => {
         if (reason.name === "AbortError") {
-          console.log("Fetch aborted");
+          console.warn("Fetch aborted");
         } else {
           console.error(`failed to load messages for chatId: ${id}. ${reason}`);
         }
@@ -100,7 +97,6 @@ export default function MainPanel() {
 
   const archiveChat = useCallback(
     (id: string) => {
-      console.log("archiving chat", id);
       moveChatFile(id)
         .then(() => {
           if (chatId === id) {
@@ -137,8 +133,6 @@ export default function MainPanel() {
   const addAssistanceMessage = useCallback(
     (text: string, chatId: string) => {
       askLLM({ chatId, text, llm }).then(({ replyText, chatName }) => {
-        console.log("chatName returned", chatName);
-
         setState((prev) => {
           return {
             ...prev,

@@ -6,7 +6,11 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     watch: {
-      ignored: ["**/server/messages/**"],
+      ignored: [
+        "**/server/messages/**",
+        "**/server/archive/**",
+        "**/server/chat-index.json",
+      ],
     },
   },
 });

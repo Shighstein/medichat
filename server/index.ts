@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { constructMessage } from "../src/utils/messageUtils.js";
-import { Message, ROLES } from "../src/types/types";
+import { Chat, Message, ROLES } from "../src/types/types";
 
 dotenv.config();
 // const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -49,7 +49,7 @@ if (!fs.existsSync(ARCHIVE_DIR)) {
 }
 
 app.post("/api/chats", async (req, res) => {
-  const chatId = Date.now().toString(); // TODO: come up with better naming
+  const chatId = Date.now().toString();
   const initialMessage = [
     constructMessage(1, ROLES.ASSISTANT, "Hi there! Ask me anything!", chatId),
   ];
@@ -83,7 +83,7 @@ async function parseChatNames() {
 
 // gets all the message files to build the chat list
 app.get("/api/chats", async (req, res) => {
-  const files = await parseChatNames();
+  const files: Chat[] = await parseChatNames();
   res.json(files);
 });
 
@@ -132,8 +132,6 @@ app.post("/api/messages/:chatId", async (req, res) => {
   }));
 
   let response: Response;
-  // let chatName;
-  let replyText: Message;
   // if (req.body.llm === "claude") {
   //   response = await getResponseFromClaude(history);
   // } else {
@@ -144,7 +142,7 @@ app.post("/api/messages/:chatId", async (req, res) => {
 
   const { chatName, reply } = JSON.parse(data.message.content);
 
-  replyText = constructMessage(
+  const replyText: Message = constructMessage(
     messages.length + 1,
     ROLES.ASSISTANT,
     reply,
@@ -168,44 +166,25 @@ app.post("/api/messages/:chatId", async (req, res) => {
 app.listen(3001, () => console.log("API running on http://localhost:3001"));
 
 // helpers
-
-// async function updateChatName(history: Message[]) {
-//   const response = await fetch("http://localhost:11434/api/chat", {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify({
-//       model: "llama3.1",
-//       stream: false,
-//       messages: [
-//         ...history,
-//         {
-//           role: ROLES.SYSTEM,
-//           content:
-//             "Summarize the topic of this conversation in 3 to 5 words. Reply with only the summary - no punctuation. no quotes, no preamble.",
-//         },
-//       ],
-//     }),
+/**
+ * Keep this commented out for now.
+ * @param history 
+ * @returns Response
+ */
+// async function getResponseFromClaude(history: Message[]) {
+//   throw new Error(
+//     "Claude integration is not enabled for the time being. Please use Ollama instead",
+//   );
+//   const response = await anthropic.messages.create({
+//     model: "claude-sonnet-4-5",
+//     max_tokens: 500,
+//     system:
+//       "You are a knowledgeable medical assistant. Answer clearly and concisely. Always recommend consulting a doctor for serious concerns.",
+//     messages: history,
 //   });
 
-//   const data = await response.json();
-//   return data.message.content.trim();
+//   return response;
 // }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function getResponseFromClaude(history: Message[]) {
-  throw new Error(
-    "Claude integration is not enabled for the time being. Please use Ollama instead",
-  );
-  // const response = await anthropic.messages.create({
-  //   model: "claude-sonnet-4-5",
-  //   max_tokens: 500,
-  //   system:
-  //     "You are a knowledgeable medical assistant. Answer clearly and concisely. Always recommend consulting a doctor for serious concerns.",
-  //   messages: history,
-  // });
-
-  // return response;
-}
 
 async function getResponseFromOllama(history: Message[]) {
   const response: Response = await fetch("http://localhost:11434/api/chat", {
@@ -217,8 +196,6 @@ async function getResponseFromOllama(history: Message[]) {
       format: {
         type: "object",
         properties: {
-          // hasEnoughContextToRename: { type: "boolean" },
-          // hasEnoughContextForSuggestions: { type: "boolean" },
           chatName: { type: ["string", "null"] },
           reply: { type: "string" },
         },
