@@ -7,7 +7,7 @@ Simply tell it the symptoms you are experiencing and let it ask you.  Eventually
 This is just meant to be a simple personal project so it's not meant to be an actual medical advisor of any sort. As any other AI Agent, it can make mistakes, please don't take what it suggests seriously!
 
 ## Known issues
-* LLM switcher (cloud Claude API/Ollama local) - the switch on UI exists but Claude option is disabled temporarily
+* LLM switcher (either Claude API/Ollama local) - the switch on UI exists but Claude option is disabled temporarily
 
 ## Testing
 None of those for now
